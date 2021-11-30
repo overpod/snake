@@ -35,5 +35,66 @@ sudo make instal
 make
 ~~~
 
+## Как использовать для Windows?
 
+Установите следующие пакеты:
+ 
+ * [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win) 
+ * [git](https://git-scm.com/) 
+ * [msys2](https://www.msys2.org/)
+ 
+Выполните следующие действия:
+ 
+**1. Установите MinGW в msys2.**
+Введите эту команду в msys2 
+```
+pacman -S mingw-w64-make  
+```
+![avatar](https://github.com/overpod/snake/blob/other/image/Install_MinGW_in_msys2.PNG?raw=true)
 
+**2. Создайте новый путь в разделе "Путь".**
+Способ: Этот компьютер → правая кнопка мыши (нажмите свойства) → дополнительные системные параметры → переменные среды → в окне системные переменные измените "Путь" → добавьте 2 пути:
+```
+  C:\msys64\mingw64\bin  
+```
+```
+  C:\msys64\usr\bin
+```
+
+![avatar](https://github.com/overpod/snake/blob/other/image/path.PNG?raw=true)
+
+**3. Установите make в msys2.**
+Введите эту команду добавить в msys2:
+```
+  pacman -S make 
+```
+**4. Создание клона каталога raylab.**
+В msys2 перейдите в каталог:
+```
+С:\
+```  
+Введите эту команду: 
+```
+git clone https://github.com/raysan5/raylib.git 
+```
+**5. Запустите raylib.**
+В msys2 перейдите в каталог:
+
+```
+ C:\raylib\src.   
+```
+Введите в msys2 эту команду:
+```
+make 
+```
+**6. Создание клона каталога "Snake".**
+* Выберите папку, в которой вы хотите работать.
+* В msys2, в вашем каталоге.
+* Введите эту команду:
+```
+git clone https://github.com/overpod/snake.git  
+```
+## Удачи
+
+Реквизиты для разработки проекта:
+677VyVGPQxEsdVsnbqcvQh9RvXFYM52qDa1cXpx7bLWS (SOL)
