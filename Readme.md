@@ -14,10 +14,10 @@
 6. Install make in msys2. Enter this command: **add pacman -S make** in msys2
 7. Creating a clone of the raylab directory.
 * In msys2, go to the directory: **С:\\** 
-* Enter this commnd: **git clone https://github.com/raysan5/raylib.git**
-8. In msys2, go to the directory: **C:\raylib\src**. Enter in msys2 this commnd: **make**
+* Enter this command: **git clone https://github.com/raysan5/raylib.git**
+8. In msys2, go to the directory: **C:\raylib\src**. Enter in msys2 this command: **make**
 9. Creating a clone of the "Snake Game" directory. Select a folder do you want to work
 * In msys2, in the your directory: 
-* Enter this commnd: **git clone https://github.com/overpod/snake.git** 
+* Enter this command: **git clone https://github.com/overpod/snake.git** 
 
 ## Good luck
