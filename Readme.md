@@ -4,10 +4,10 @@
 
 **Install the following packages**
 
-1. [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
-2. [msys2](www.msys2.org)
+1. Install [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
+2. Install [msys2](www.msys2.org)
 3. Install MinGW in msys2. Enter this command: **pacman -S mingw-w64-make** in msys2
-4. [git](https://git-scm.com/)
+4. Install [git](https://git-scm.com/)
 5. Create a new path in "Path". Way: This computer → right mouse button (click properties) → additional system parameters → environment variables → in the system variables window, change "PACH" → add 2 paths:
 * C:\msys64\mingw64\bin
 * C:\msys64\usr\bin 
