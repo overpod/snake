@@ -14,6 +14,7 @@ Enter this command in msys2:
 pacman -S mingw-w64-make  
 ```
 ![avatar](https://avatars.mds.yandex.net/get-images-cbir/2191032/pPn3CDdNUvyVflPYbLLmKg1902/ocr)
+
 **2. Create a new path in "Path".** 
 Way: This computer → right mouse button (click properties) → additional system parameters → environment variables → in the system variables window, change "Path" → add 2 paths: 
 ```
