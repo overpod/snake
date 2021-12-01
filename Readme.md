@@ -24,7 +24,7 @@ Way: This computer → right mouse button (click properties) → additional syst
   C:\msys64\usr\bin
 ```
 
-![avatar](/image/add_2_paths.png)
+![avatar](/image/path.png)
 
 **3. Install make in msys2.** 
 Enter this command add in msys2:
