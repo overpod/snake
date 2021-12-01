@@ -4,10 +4,17 @@
 
 **Install the following packages**
 
-1. Install [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
-2. Install [msys2](www.msys2.org)
-3. Install MinGW in msys2. Enter this command: **pacman -S mingw-w64-make** in msys2
-4. Install [git](https://git-scm.com/)
+   * Install [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
+   * Install [msys2](www.msys2.org)
+   * Install [git](https://git-scm.com/)
+
+1. Install MinGW in msys2. (скрин консоли)
+```
+pacman -S mingw-w64-make
+```
+
+ Enter this command:  in msys2
+
 5. Create a new path in "Path". Way: This computer → right mouse button (click properties) → additional system parameters → environment variables → in the system variables window, change "PACH" → add 2 paths:
 * C:\msys64\mingw64\bin
 * C:\msys64\usr\bin 
@@ -20,4 +27,4 @@
 * In msys2, in the your directory: 
 * Enter this command: **git clone https://github.com/overpod/snake.git** 
 
-## Good luck
+## Good luck git 
