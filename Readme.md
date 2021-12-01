@@ -2,7 +2,7 @@
 
 ### How to use for windows
 
-//**Install the following packages**
+**Install the following packages**
 
 1. [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win)
 2. [msys2](www.msys2.org)
