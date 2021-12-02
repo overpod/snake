@@ -57,6 +57,4 @@ make
 ```
 git clone https://github.com/overpod/snake.git  
 ```
-## Good luck
 
-Details for the development of the project: 677VyVGPQxEsdVsnbqcvQh9RvXFYM52qDa1cXpx7bLWS (SOL)
