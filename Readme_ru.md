@@ -13,7 +13,7 @@
 ```
 pacman -S mingw-w64-make  
 ```
-![avatar](https://github.com/overpod/snake/blob/other/image/Install_MinGW_in_msys2.PNG?raw=true)
+![avatar](https://github.com/overpod/snake/blob/main/image/Install_MinGW_in_msys2.PNG?raw=true)
 
 #### Создайте новый путь в разделе "Путь".
 Способ: Этот компьютер → правая кнопка мыши (нажмите свойства) → дополнительные системные параметры → переменные среды → в окне системные переменные измените "Путь" → добавьте 2 пути:
@@ -24,7 +24,7 @@ pacman -S mingw-w64-make
   C:\msys64\usr\bin
 ```
 
-![avatar](https://github.com/overpod/snake/blob/other/image/path.PNG?raw=true)
+![avatar](https://github.com/overpod/snake/blob/main/image/path.PNG?raw=true)
 
 #### Установите make в msys2.
 Введите эту команду добавить в msys2:

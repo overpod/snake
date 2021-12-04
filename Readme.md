@@ -13,7 +13,7 @@ Enter this command in msys2:
 ```
 pacman -S mingw-w64-make  
 ```
-![avatar](https://github.com/overpod/snake/blob/other/image/Install_MinGW_in_msys2.PNG?raw=true)
+![avatar](https://github.com/overpod/snake/blob/main/image/Install_MinGW_in_msys2.PNG?raw=true)
 
 #### 2. Create a new path in "Path".
 Way: This computer → right mouse button (click properties) → additional system parameters → environment variables → in the system variables window, change "Path" → add 2 paths: 
@@ -24,7 +24,7 @@ Way: This computer → right mouse button (click properties) → additional syst
   C:\msys64\usr\bin
 ```
 
-![avatar](https://github.com/overpod/snake/blob/other/image/path.PNG?raw=true)
+![avatar](https://github.com/overpod/snake/blob/main/image/path.PNG?raw=true)
 
 #### 3. Install make in msys2.
 Enter this command add in msys2:
