@@ -20,7 +20,7 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "~/Documents/me/lib/raylib/src"
+                "~/libs/raylib/src"
             ],
             "defines": [],
             "macFrameworkPath": [
