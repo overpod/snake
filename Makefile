@@ -1,5 +1,19 @@
 # Define raylib source code path
 RAYLIB_SRC_PATH ?= c:\raylib\src
+
+
+ifeq ($(OS),Windows_NT)
+    RAYLIB_SRC_PATH = c:\raylib\src
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+        CCFLAGS += -D LINUX
+    endif
+    ifeq ($(UNAME_S),Darwin)
+        RAYLIB_SRC_PATH = $(HOME)/libs/raylib/src
+    endif
+endif
+
 # Define default C compiler
 CC ?= gcc
 
@@ -11,4 +25,9 @@ linux:
 	$(CC) ./main.c -o snake -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 	./snake
 	rm ./snake
+mac:
+	$(CC) main.c -o snake -I$(RAYLIB_SRC_PATH) $(RAYLIB_SRC_PATH)/libraylib.a -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL
+	./snake
+	rm ./snake	
+
 
