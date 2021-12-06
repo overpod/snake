@@ -240,7 +240,6 @@ int main(void)
         BeginTextureMode(canvas);
         ClearBackground(GREEN);
 
-        PrintDirection(key);
         Draw();
 
         // On pause, we draw a blinking message
@@ -545,25 +544,6 @@ void CheckDirection(void)
         snake.nextDirection_x = 0;
         snake.nextDirection_y = 1;
         key = KEY_DOWN;
-    }
-}
-
-void PrintDirection(int key)
-{
-    switch (key)
-    {
-    case KEY_UP:
-        DrawText("UP", 60, CANVAS_HEIGHT / 2 - 20, 20, DARKGREEN);
-        break;
-    case KEY_DOWN:
-        DrawText("DOWN", 60, CANVAS_HEIGHT / 2 - 20, 20, DARKGREEN);
-        break;
-    case KEY_RIGHT:
-        DrawText("RIGHT", 60, CANVAS_HEIGHT / 2 - 20, 20, DARKGREEN);
-        break;
-    case KEY_LEFT:
-        DrawText("LEFT", 60, CANVAS_HEIGHT / 2 - 20, 20, DARKGREEN);
-        break;
     }
 }
 
