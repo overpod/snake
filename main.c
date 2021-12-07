@@ -5,6 +5,7 @@
 #include <time.h>
 #include "raylib.h"
 
+#define SPRITE_EDGE_SIZE 64
 #define CANVAS_WIDTH 800
 #define CANVAS_HEIGHT 400
 #define SNAKE_SIZE 40
@@ -47,30 +48,24 @@ typedef struct Snake
 
 typedef enum SnakeParts
 {
-    TURN_UP_TO_RIGHT = 0,
+    TURN_UP_TO_RIGHT,
     BODY_HORIZONTAL,
     TURN_UP_TO_LEFT,
     HEAD_UP,
     HEAD_RIGHT,
     TURN_DOWN_TO_RIGHT,
-    NOTHING_1,
     BODY_VERTICAL,
     HEAD_LEFT,
     HEAD_DOWN,
-    NOTHING_2,
-    NOTHING_3,
     TURN_DOWN_TO_LEFT,
     TALE_DOWN,
     TALE_LEFT,
     APPLE,
-    NOTHING_4,
-    NOTHING_5,
     TALE_RIGHT,
-    TALE_UP,
-    NUMBER_OF_PARTS,
+    TALE_UP
 } SnakeParts;
 
-Texture2D textureSnakeParts[NUMBER_OF_PARTS]; // Array of textures of snake parts
+Texture2D textureSnakeParts[TALE_UP + 1]; // Array of textures of snake parts
 Sound eatApple;
 Sound wallCollision;
 
@@ -128,6 +123,8 @@ void CheckFoodIsEaten(void);
 
 void CheckCollision(void);
 
+void UploadSnakeParts(void);
+
 //====================================================================================
 
 void Draw(void)
@@ -178,23 +175,7 @@ int main(void)
     srand(time(NULL));
     int framesCounter = 0;
 
-    // Upload snake parts from image to texture array
-    Image snakeParts[NUMBER_OF_PARTS];
-    for (int x = 0; x < 4; x++)
-    {
-        for (int y = 0; y < 5; y++)
-        {
-            snakeParts[x * 5 + y] = LoadImage("resources/snake-parts.png");
-            Rectangle crop = {snakeParts[x * 5 + y].width / 5 * y,
-                              snakeParts[x * 5 + y].height / 4 * x,
-                              snakeParts[x * 5 + y].width / 5,
-                              snakeParts[x * 5 + y].height / 4};
-            ImageCrop(&snakeParts[x * 5 + y], crop);
-            ImageResize(&snakeParts[x * 5 + y], SNAKE_SIZE, SNAKE_SIZE);
-            textureSnakeParts[x * 5 + y] = LoadTextureFromImage(snakeParts[x * 5 + y]);
-            UnloadImage(snakeParts[x * 5 + y]);
-        }
-    }
+    UploadSnakeParts();
 
     //-----------------------------------------------------------------------------------
 
@@ -262,6 +243,89 @@ int main(void)
 
 // FUNCTIONS
 //====================================================================================
+
+void UploadSnakeParts(void)
+{
+    // Upload snake parts from image to texture array
+    Image snakeParts[TALE_UP + 1];
+    Image snakePartsImage = LoadImage("resources/snake-parts.png");
+
+    for (int textureIndex = TURN_UP_TO_RIGHT; textureIndex < TALE_UP + 1; textureIndex++)
+    {
+        int x = 0;
+        int y = 0;
+        switch (textureIndex)
+        {
+        case TURN_UP_TO_RIGHT:
+            x = 0;
+            y = 0;
+            break;
+        case BODY_HORIZONTAL:
+            x = 1;
+            y = 0;
+            break;
+        case TURN_UP_TO_LEFT:
+            x = 2;
+            y = 0;
+            break;
+        case HEAD_UP:
+            x = 3;
+            y = 0;
+            break;
+        case HEAD_RIGHT:
+            x = 4;
+            y = 0;
+            break;
+        case TURN_DOWN_TO_RIGHT:
+            x = 0;
+            y = 1;
+            break;
+        case BODY_VERTICAL:
+            x = 2;
+            y = 1;
+            break;
+        case HEAD_LEFT:
+            x = 3;
+            y = 1;
+            break;
+        case HEAD_DOWN:
+            x = 4;
+            y = 1;
+            break;
+        case TURN_DOWN_TO_LEFT:
+            x = 2;
+            y = 2;
+            break;
+        case TALE_DOWN:
+            x = 3;
+            y = 2;
+            break;
+        case TALE_LEFT:
+            x = 4;
+            y = 2;
+            break;
+        case APPLE:
+            x = 0;
+            y = 3;
+            break;
+        case TALE_RIGHT:
+            x = 3;
+            y = 3;
+            break;
+        case TALE_UP:
+            x = 4;
+            y = 3;
+            break;
+        default:
+            break;
+        }
+
+        Rectangle crop = {x * SPRITE_EDGE_SIZE, y * SPRITE_EDGE_SIZE, SPRITE_EDGE_SIZE, SPRITE_EDGE_SIZE};
+        Image partImage = ImageFromImage(snakePartsImage, crop);
+        ImageResize(&partImage, SNAKE_SIZE, SNAKE_SIZE);
+        textureSnakeParts[textureIndex] = LoadTextureFromImage(partImage);
+    }
+}
 
 void SetupSnake(void)
 {
