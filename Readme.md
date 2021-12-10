@@ -8,7 +8,7 @@ Install the following packages:
  
 Do the following: 
  
-#### 1. Install MinGW in msys2.
+#### 1. Install MinGW in msys2.dsfsd 
 Enter this command in msys2:  
 ```
 pacman -S mingw-w64-make  
