@@ -306,15 +306,15 @@ void UploadSnakeParts(void)
             break;
         case APPLE:
             x = 0;
-            y = 3;
+            y = 2;
             break;
         case TALE_RIGHT:
-            x = 3;
-            y = 3;
+            x = 1;
+            y = 2;
             break;
         case TALE_UP:
-            x = 4;
-            y = 3;
+            x = 1;
+            y = 1;
             break;
         default:
             break;
