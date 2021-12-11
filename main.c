@@ -6,10 +6,12 @@
 #include "raylib.h"
 
 #define SPRITE_EDGE_SIZE 64
+#define PIECE_NUMBER_IN_WIDTH 5
+#define PIECE_NUMBER_IN_HEIGHT 3
 #define CANVAS_WIDTH 800
 #define CANVAS_HEIGHT 400
 #define SNAKE_SIZE 40
-#define SNAKE_SPEED 0.3f
+#define SNAKE_SPEED 0.1f
 
 #define FEILD_WIDTH CANVAS_WIDTH / SNAKE_SIZE
 #define FEILD_HEIGHT CANVAS_HEIGHT / SNAKE_SIZE
@@ -54,18 +56,19 @@ typedef enum SnakeParts
     HEAD_UP,
     HEAD_RIGHT,
     TURN_DOWN_TO_RIGHT,
+    TALE_UP,
     BODY_VERTICAL,
     HEAD_LEFT,
     HEAD_DOWN,
+    APPLE,
+    TALE_RIGHT,
     TURN_DOWN_TO_LEFT,
     TALE_DOWN,
     TALE_LEFT,
-    APPLE,
-    TALE_RIGHT,
-    TALE_UP
+    NUMBER_OF_PIECES,
 } SnakeParts;
 
-Texture2D textureSnakeParts[TALE_UP + 1]; // Array of textures of snake parts
+Texture2D textureSnakeParts[NUMBER_OF_PIECES]; // Array of textures of snake parts
 Sound eatApple;
 Sound wallCollision;
 
@@ -247,84 +250,23 @@ int main(void)
 void UploadSnakeParts(void)
 {
     // Upload snake parts from image to texture array
-    Image snakeParts[TALE_UP + 1];
-    Image snakePartsImage = LoadImage("resources/snake-parts.png");
-
-    for (int textureIndex = TURN_UP_TO_RIGHT; textureIndex < TALE_UP + 1; textureIndex++)
+    Image snakeSprites = LoadImage("resources/snake-parts.png");
+    for (int x = 0; x < PIECE_NUMBER_IN_HEIGHT; x++)
     {
-        int x = 0;
-        int y = 0;
-        switch (textureIndex)
+        for (int y = 0; y < PIECE_NUMBER_IN_WIDTH; y++)
         {
-        case TURN_UP_TO_RIGHT:
-            x = 0;
-            y = 0;
-            break;
-        case BODY_HORIZONTAL:
-            x = 1;
-            y = 0;
-            break;
-        case TURN_UP_TO_LEFT:
-            x = 2;
-            y = 0;
-            break;
-        case HEAD_UP:
-            x = 3;
-            y = 0;
-            break;
-        case HEAD_RIGHT:
-            x = 4;
-            y = 0;
-            break;
-        case TURN_DOWN_TO_RIGHT:
-            x = 0;
-            y = 1;
-            break;
-        case BODY_VERTICAL:
-            x = 2;
-            y = 1;
-            break;
-        case HEAD_LEFT:
-            x = 3;
-            y = 1;
-            break;
-        case HEAD_DOWN:
-            x = 4;
-            y = 1;
-            break;
-        case TURN_DOWN_TO_LEFT:
-            x = 2;
-            y = 2;
-            break;
-        case TALE_DOWN:
-            x = 3;
-            y = 2;
-            break;
-        case TALE_LEFT:
-            x = 4;
-            y = 2;
-            break;
-        case APPLE:
-            x = 0;
-            y = 2;
-            break;
-        case TALE_RIGHT:
-            x = 1;
-            y = 2;
-            break;
-        case TALE_UP:
-            x = 1;
-            y = 1;
-            break;
-        default:
-            break;
+            int Index = x * 5 + y;
+            Rectangle crop = {SPRITE_EDGE_SIZE * y,
+                              SPRITE_EDGE_SIZE * x,
+                              SPRITE_EDGE_SIZE,
+                              SPRITE_EDGE_SIZE};
+            Image partImage = ImageFromImage(snakeSprites, crop);
+            ImageResize(&partImage, SNAKE_SIZE, SNAKE_SIZE);
+            textureSnakeParts[Index] = LoadTextureFromImage(partImage);
+            UnloadImage(partImage);
         }
-
-        Rectangle crop = {x * SPRITE_EDGE_SIZE, y * SPRITE_EDGE_SIZE, SPRITE_EDGE_SIZE, SPRITE_EDGE_SIZE};
-        Image partImage = ImageFromImage(snakePartsImage, crop);
-        ImageResize(&partImage, SNAKE_SIZE, SNAKE_SIZE);
-        textureSnakeParts[textureIndex] = LoadTextureFromImage(partImage);
     }
+    UnloadImage(snakeSprites);
 }
 
 void SetupSnake(void)
