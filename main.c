@@ -105,8 +105,6 @@ void DrawSnakeTale(int, int);
 
 void DrawSnake(void);
 
-void DrawFeild(void);
-
 void DrawFood(void);
 
 void MoveSnake(void);
@@ -368,19 +366,6 @@ void CreateNewSnake(void)
     }
 }
 
-// Not used function. Need to draw cell in game feild, it helps in bug fixing
-void DrawFeild(void)
-{
-    for (int x = 0; x < FEILD_WIDTH; x++)
-    {
-        for (int y = 0; y < FEILD_WIDTH; y++)
-        {
-            DrawRectangle(x * SNAKE_SIZE, y * SNAKE_SIZE, SNAKE_SIZE, SNAKE_SIZE, RED);
-            DrawRectangle(x * SNAKE_SIZE + 1, y * SNAKE_SIZE + 1, SNAKE_SIZE - 2, SNAKE_SIZE - 2, GREEN);
-        }
-    }
-}
-
 void DrawSnakeBody(int x, int y)
 {
     int prevDirX = gameFeild[x][y].prevDirectionX;
@@ -392,19 +377,24 @@ void DrawSnakeBody(int x, int y)
 
     if (prevDirX == 0 && dirX == 0)
         temporaryTexture = textureSnakeParts[BODY_VERTICAL];
-    else if (prevDirY == 0 && dirY == 0)
+
+    if (prevDirY == 0 && dirY == 0)
         temporaryTexture = textureSnakeParts[BODY_HORIZONTAL];
-    else if ((prevDirX == 0 && prevDirY == -1 && dirX == -1 && dirY == 0) ||
-             (prevDirX == 1 && prevDirY == 0 && dirX == 0 && dirY == 1))
+
+    if ((prevDirX == 0 && prevDirY == -1 && dirX == -1 && dirY == 0) ||
+        (prevDirX == 1 && prevDirY == 0 && dirX == 0 && dirY == 1))
         temporaryTexture = textureSnakeParts[TURN_UP_TO_LEFT];
-    else if ((prevDirX == 0 && prevDirY == -1 && dirX == 1 && dirY == 0) ||
-             (prevDirX == -1 && prevDirY == 0 && dirX == 0 && dirY == 1))
+
+    if ((prevDirX == 0 && prevDirY == -1 && dirX == 1 && dirY == 0) ||
+        (prevDirX == -1 && prevDirY == 0 && dirX == 0 && dirY == 1))
         temporaryTexture = textureSnakeParts[TURN_UP_TO_RIGHT];
-    else if ((prevDirX == 0 && prevDirY == 1 && dirX == 1 && dirY == 0) ||
-             (prevDirX == -1 && prevDirY == 0 && dirX == 0 && dirY == -1))
+
+    if ((prevDirX == 0 && prevDirY == 1 && dirX == 1 && dirY == 0) ||
+        (prevDirX == -1 && prevDirY == 0 && dirX == 0 && dirY == -1))
         temporaryTexture = textureSnakeParts[TURN_DOWN_TO_RIGHT];
-    else if ((prevDirX == 0 && prevDirY == 1 && dirX == -1 && dirY == 0) ||
-             (prevDirX == 1 && prevDirY == 0 && dirX == 0 && dirY == -1))
+
+    if ((prevDirX == 0 && prevDirY == 1 && dirX == -1 && dirY == 0) ||
+        (prevDirX == 1 && prevDirY == 0 && dirX == 0 && dirY == -1))
         temporaryTexture = textureSnakeParts[TURN_DOWN_TO_LEFT];
 
     DrawTexture(temporaryTexture, x * SNAKE_SIZE, y * SNAKE_SIZE, WHITE);
@@ -432,24 +422,19 @@ void DrawSnakeHead(void)
 
     if (gameFeild[snake.headX][snake.headY].headDirectionX == 1 &&
         gameFeild[snake.headX][snake.headY].headDirectionY == 0)
-    {
         temporaryTexture = textureSnakeParts[HEAD_RIGHT];
-    }
-    else if (gameFeild[snake.headX][snake.headY].headDirectionX == -1 &&
-             gameFeild[snake.headX][snake.headY].headDirectionY == 0)
-    {
+
+    if (gameFeild[snake.headX][snake.headY].headDirectionX == -1 &&
+        gameFeild[snake.headX][snake.headY].headDirectionY == 0)
         temporaryTexture = textureSnakeParts[HEAD_LEFT];
-    }
-    else if (gameFeild[snake.headX][snake.headY].headDirectionX == 0 &&
-             gameFeild[snake.headX][snake.headY].headDirectionY == -1)
-    {
+
+    if (gameFeild[snake.headX][snake.headY].headDirectionX == 0 &&
+        gameFeild[snake.headX][snake.headY].headDirectionY == -1)
         temporaryTexture = textureSnakeParts[HEAD_UP];
-    }
-    else if (gameFeild[snake.headX][snake.headY].headDirectionX == 0 &&
-             gameFeild[snake.headX][snake.headY].headDirectionY == 1)
-    {
+
+    if (gameFeild[snake.headX][snake.headY].headDirectionX == 0 &&
+        gameFeild[snake.headX][snake.headY].headDirectionY == 1)
         temporaryTexture = textureSnakeParts[HEAD_DOWN];
-    }
 
     DrawTexture(temporaryTexture, snake.headX * SNAKE_SIZE, snake.headY * SNAKE_SIZE, WHITE);
 }
@@ -486,11 +471,18 @@ void DrawSnake(void)
         {
             if (gameFeild[x][y].lifeTime > 1 && gameFeild[x][y].lifeTime < snake.length)
                 DrawSnakeBody(x, y);
-            else if (gameFeild[x][y].lifeTime == 1)
+
+            if (gameFeild[x][y].lifeTime == 1)
                 DrawSnakeTale(x, y);
-            else if (gameFeild[x][y].lifeTime == 0)
+
+            if (gameFeild[x][y].lifeTime == 0)
             {
-                gameFeild[x][y].prevDirectionX = gameFeild[x][y].prevDirectionY = gameFeild[x][y].directionX = gameFeild[x][y].directionY = gameFeild[x][y].headDirectionX = gameFeild[x][y].headDirectionY = 2;
+                gameFeild[x][y].prevDirectionX = 2;
+                gameFeild[x][y].prevDirectionY = 2;
+                gameFeild[x][y].directionX = 2;
+                gameFeild[x][y].directionY = 2;
+                gameFeild[x][y].headDirectionX = 2;
+                gameFeild[x][y].headDirectionY = 2;
             }
         }
     }
