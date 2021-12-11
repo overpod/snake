@@ -268,7 +268,7 @@ void UploadSnakeParts(void)
     {
         for (int y = 0; y < PIECE_NUMBER_IN_WIDTH; y++)
         {
-            int Index = x * 5 + y;
+            int Index = x * PIECE_NUMBER_IN_WIDTH + y;
             Rectangle crop = {SPRITE_EDGE_SIZE * y,
                               SPRITE_EDGE_SIZE * x,
                               SPRITE_EDGE_SIZE,
