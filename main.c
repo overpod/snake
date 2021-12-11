@@ -27,7 +27,7 @@ int key;
 bool collision = 0;
 bool pause = 0;
 bool death = 0;
-int scoreCount = 0;
+int score = 0;
 
 typedef struct Snake
 {
@@ -47,6 +47,13 @@ typedef struct Snake
     char headDirectionX;
     bool hasEaten; // Return true if food has eaten
 } Snake;
+
+typedef enum StoragePosition
+{
+    STORAGE_POSITION_SCORE,
+    STORAGE_POSITION_HISCORE,
+
+} StoragePosition;
 
 typedef enum SnakeParts
 {
@@ -177,7 +184,8 @@ int main(void)
     //-----------------------------------------------------------------------------------
     srand(time(NULL));
     int framesCounter = 0;
-
+    int hiScore = LoadStorageValue(STORAGE_POSITION_HISCORE);
+    
     UploadSnakeParts();
 
     //-----------------------------------------------------------------------------------
@@ -194,6 +202,7 @@ int main(void)
             death = 0;
             collision = 0;
             key = 0;
+            score = 0;
             SetupSnake();
         }
         // Pause
@@ -204,6 +213,10 @@ int main(void)
         if (!pause && !death)
         {
             Update();
+            if (score > hiScore){
+                SaveStorageValue(STORAGE_POSITION_HISCORE, score);
+                hiScore = score;
+            }
         }
         else
             framesCounter++;
@@ -222,8 +235,8 @@ int main(void)
 
         if (death)
         {
-            DrawText(TextFormat("SCORE: %i", scoreCount), 280, 50, 40, MAROON);
-            DrawText("      YOU ARE DEAD !!!  =(\n Press R to restart the game", CANVAS_WIDTH / 2 - 220, CANVAS_HEIGHT / 2 - 60, 30, BLACK);
+            DrawText(TextFormat("SCORE: %i\nHI-SCORE: %i", score, hiScore), 280, 50, 40, MAROON);
+            DrawText("      YOU ARE DEAD !!!  =(\n Press R to restart the game", CANVAS_WIDTH / 2 - 220, CANVAS_HEIGHT / 2 - 20, 30, BLACK);
         }
 
         EndTextureMode();
@@ -444,7 +457,7 @@ void CheckFoodIsEaten(void)
     if (foodX == snake.headX && foodY == snake.headY)
     {
         snake.length++;
-        scoreCount += 10;
+        score += 10;
         snake.hasEaten = 1;
         PlaySound(eatApple);
         SpawnFood();
