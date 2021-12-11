@@ -14,6 +14,9 @@
 #define FEILD_WIDTH CANVAS_WIDTH / SNAKE_SIZE
 #define FEILD_HEIGHT CANVAS_HEIGHT / SNAKE_SIZE
 
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
 const Vector2 ZERO_VEC = {0, 0};
 
 // Global declaration
@@ -125,6 +128,8 @@ void CheckCollision(void);
 
 void UploadSnakeParts(void);
 
+Vector2 ClampValue(Vector2 value, Vector2 min, Vector2 max);
+
 //====================================================================================
 
 void Draw(void)
@@ -140,27 +145,16 @@ void Update()
     CheckFoodIsEaten();
 }
 
-// Function to scale canvas
-Rectangle GetCanvasTarget()
-{
-    float screenHeight = (float)GetScreenHeight();
-    float screenWidth = (float)GetScreenWidth();
-    float scale = fminf(screenHeight / CANVAS_HEIGHT, screenWidth / CANVAS_WIDTH);
-    Rectangle rec = {0, 0, CANVAS_WIDTH * scale, CANVAS_HEIGHT * scale};
-    return rec;
-}
-
 int main(void)
 {
     // Resizable window
     //-----------------------------------------------------------------------------------
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(CANVAS_WIDTH, CANVAS_HEIGHT, "Snake");
+    SetWindowMinSize(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
 
-    // Canvas setup
-    RenderTexture2D canvas = LoadRenderTexture(CANVAS_WIDTH, CANVAS_HEIGHT);
-    Rectangle canvasField = {0, 0, canvas.texture.width, -canvas.texture.height};
-    SetTextureFilter(canvas.texture, TEXTURE_FILTER_POINT);
+    RenderTexture2D target = LoadRenderTexture(CANVAS_WIDTH, CANVAS_HEIGHT);
+    SetTextureFilter(target.texture, TEXTURE_FILTER_BILINEAR);
     //-----------------------------------------------------------------------------------
 
     // Initialize audio device
@@ -185,6 +179,7 @@ int main(void)
     //====================================================================================
     while (!WindowShouldClose())
     {
+        float scale = min((float)GetScreenWidth() / CANVAS_WIDTH, (float)GetScreenHeight() / CANVAS_HEIGHT);
         // Restart
         if (IsKeyPressed(KEY_R))
         {
@@ -205,11 +200,33 @@ int main(void)
         else
             framesCounter++;
 
+        ////////////////////////////////////////////////////////////////
+        // check for alt + enter
+        if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
+        {
+            // see what display we are on right now
+            int display = GetCurrentMonitor();
+
+            if (IsWindowFullscreen())
+            {
+                ToggleFullscreen();
+                // if we are full screen, then go back to the windowed size
+                SetWindowSize(CANVAS_WIDTH, CANVAS_HEIGHT);
+            }
+            else
+            {
+                // if we are not full screen, set the window size to match the monitor we are on
+                SetWindowSize(GetMonitorWidth(display), GetMonitorHeight(display));
+
+                // toggle the state
+                ToggleFullscreen();
+            }
+        }
+
         // -------------------------------------------------------------------------------
         // Draw
         // -------------------------------------------------------------------------------
-        BeginDrawing();
-        BeginTextureMode(canvas);
+        BeginTextureMode(target);
         ClearBackground(GREEN);
         Draw();
 
@@ -224,8 +241,15 @@ int main(void)
         }
 
         EndTextureMode();
-        DrawTexturePro(canvas.texture, canvasField, GetCanvasTarget(), ZERO_VEC, 0, WHITE);
 
+        BeginDrawing();
+        ClearBackground(BLACK);
+
+        // Draw render texture to screen, properly scaled
+        DrawTexturePro(target.texture, (Rectangle){0.0f, 0.0f, (float)target.texture.width, (float)-target.texture.height},
+                       (Rectangle){(GetScreenWidth() - ((float)CANVAS_WIDTH * scale)) * 0.5f, (GetScreenHeight() - ((float)CANVAS_HEIGHT * scale)) * 0.5f,
+                                   (float)CANVAS_WIDTH * scale, (float)CANVAS_HEIGHT * scale},
+                       (Vector2){0, 0}, 0.0f, WHITE);
         EndDrawing();
     }
     //====================================================================================
@@ -243,6 +267,16 @@ int main(void)
 
 // FUNCTIONS
 //====================================================================================
+
+Vector2 ClampValue(Vector2 value, Vector2 min, Vector2 max)
+{
+    Vector2 result = value;
+    result.x = (result.x > max.x) ? max.x : result.x;
+    result.x = (result.x < min.x) ? min.x : result.x;
+    result.y = (result.y > max.y) ? max.y : result.y;
+    result.y = (result.y < min.y) ? min.y : result.y;
+    return result;
+}
 
 void UploadSnakeParts(void)
 {
