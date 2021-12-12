@@ -3,6 +3,7 @@
 Install the following packages: 
  
  * [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win) 
+ * [git](https://git-scm.com/)
  * [msys2](https://www.msys2.org/)
  
 Do the following: 
@@ -29,11 +30,6 @@ Way: This computer → right mouse button (click properties) → additional syst
 Enter this command add in msys2:
 ```
   pacman -S make 
-```
-#### Install git in msys2.
-Enter this command add in msys2:
-```
-  pacman -S git 
 ```
 
 #### Creating a clone of the raylab directory.
