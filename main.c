@@ -9,7 +9,7 @@
 #define CANVAS_WIDTH 800
 #define CANVAS_HEIGHT 400
 #define SNAKE_SIZE 40
-#define SNAKE_SPEED 0.3f
+#define SNAKE_SPEED 0.2f
 
 #define FEILD_WIDTH CANVAS_WIDTH / SNAKE_SIZE
 #define FEILD_HEIGHT CANVAS_HEIGHT / SNAKE_SIZE
@@ -28,7 +28,7 @@ int key;
 bool collision = 0;
 bool pause = 0;
 bool death = 0;
-int scoreCount = 0;
+int score = 0;
 
 typedef struct Snake
 {
@@ -49,6 +49,13 @@ typedef struct Snake
     bool hasEaten; // Return true if food has eaten
 } Snake;
 
+typedef enum StoragePosition
+{
+    STORAGE_POSITION_SCORE,
+    STORAGE_POSITION_HISCORE,
+
+} StoragePosition;
+
 typedef enum SnakeParts
 {
     TURN_UP_TO_RIGHT,
@@ -57,18 +64,18 @@ typedef enum SnakeParts
     HEAD_UP,
     HEAD_RIGHT,
     TURN_DOWN_TO_RIGHT,
+    TALE_UP,
     BODY_VERTICAL,
     HEAD_LEFT,
     HEAD_DOWN,
+    APPLE,
+    TALE_RIGHT,
     TURN_DOWN_TO_LEFT,
     TALE_DOWN,
     TALE_LEFT,
-    APPLE,
-    TALE_RIGHT,
-    TALE_UP
 } SnakeParts;
 
-Texture2D textureSnakeParts[TALE_UP + 1]; // Array of textures of snake parts
+Texture2D textureSnakeParts[TALE_LEFT + 1]; // Array of textures of snake parts
 Sound eatApple;
 Sound wallCollision;
 
@@ -168,6 +175,7 @@ int main(void)
     //-----------------------------------------------------------------------------------
     srand(time(NULL));
     int framesCounter = 0;
+    int hiScore = LoadStorageValue(STORAGE_POSITION_HISCORE);
 
     UploadSnakeParts();
 
@@ -186,6 +194,7 @@ int main(void)
             death = 0;
             collision = 0;
             key = 0;
+            score = 0;
             SetupSnake();
         }
         // Pause
@@ -196,6 +205,11 @@ int main(void)
         if (!pause && !death)
         {
             Update();
+            if (score > hiScore)
+            {
+                SaveStorageValue(STORAGE_POSITION_HISCORE, score);
+                hiScore = score;
+            }
         }
         else
             framesCounter++;
@@ -236,8 +250,8 @@ int main(void)
 
         if (death)
         {
-            DrawText(TextFormat("SCORE: %i", scoreCount), 280, 50, 40, MAROON);
-            DrawText("      YOU ARE DEAD !!!  =(\n Press R to restart the game", CANVAS_WIDTH / 2 - 220, CANVAS_HEIGHT / 2 - 60, 30, BLACK);
+            DrawText(TextFormat("SCORE: %i\nHI-SCORE: %i", score, hiScore), 280, 50, 40, MAROON);
+            DrawText("      YOU ARE DEAD !!!  =(\n Press R to restart the game", CANVAS_WIDTH / 2 - 220, CANVAS_HEIGHT / 2 - 20, 30, BLACK);
         }
 
         EndTextureMode();
@@ -281,84 +295,24 @@ Vector2 ClampValue(Vector2 value, Vector2 min, Vector2 max)
 void UploadSnakeParts(void)
 {
     // Upload snake parts from image to texture array
-    Image snakeParts[TALE_UP + 1];
-    Image snakePartsImage = LoadImage("resources/snake-parts.png");
+    Image snakeSprites = LoadImage("resources/snake-parts.png");
 
-    for (int textureIndex = TURN_UP_TO_RIGHT; textureIndex < TALE_UP + 1; textureIndex++)
+    for (int y = 0; y < snakeSprites.height / SPRITE_EDGE_SIZE; y++)
     {
-        int x = 0;
-        int y = 0;
-        switch (textureIndex)
+        for (int x = 0; x < snakeSprites.width / SPRITE_EDGE_SIZE; x++)
         {
-        case TURN_UP_TO_RIGHT:
-            x = 0;
-            y = 0;
-            break;
-        case BODY_HORIZONTAL:
-            x = 1;
-            y = 0;
-            break;
-        case TURN_UP_TO_LEFT:
-            x = 2;
-            y = 0;
-            break;
-        case HEAD_UP:
-            x = 3;
-            y = 0;
-            break;
-        case HEAD_RIGHT:
-            x = 4;
-            y = 0;
-            break;
-        case TURN_DOWN_TO_RIGHT:
-            x = 0;
-            y = 1;
-            break;
-        case BODY_VERTICAL:
-            x = 2;
-            y = 1;
-            break;
-        case HEAD_LEFT:
-            x = 3;
-            y = 1;
-            break;
-        case HEAD_DOWN:
-            x = 4;
-            y = 1;
-            break;
-        case TURN_DOWN_TO_LEFT:
-            x = 2;
-            y = 2;
-            break;
-        case TALE_DOWN:
-            x = 3;
-            y = 2;
-            break;
-        case TALE_LEFT:
-            x = 4;
-            y = 2;
-            break;
-        case APPLE:
-            x = 0;
-            y = 2;
-            break;
-        case TALE_RIGHT:
-            x = 1;
-            y = 2;
-            break;
-        case TALE_UP:
-            x = 1;
-            y = 1;
-            break;
-        default:
-            break;
+            int Index = y * snakeSprites.width / SPRITE_EDGE_SIZE + x;
+            Rectangle crop = {SPRITE_EDGE_SIZE * x,
+                              SPRITE_EDGE_SIZE * y,
+                              SPRITE_EDGE_SIZE,
+                              SPRITE_EDGE_SIZE};
+            Image partImage = ImageFromImage(snakeSprites, crop);
+            ImageResize(&partImage, SNAKE_SIZE, SNAKE_SIZE);
+            textureSnakeParts[Index] = LoadTextureFromImage(partImage);
+            UnloadImage(partImage);
         }
-
-        Rectangle crop = {x * SPRITE_EDGE_SIZE, y * SPRITE_EDGE_SIZE, SPRITE_EDGE_SIZE, SPRITE_EDGE_SIZE};
-        Image partImage = ImageFromImage(snakePartsImage, crop);
-        ImageResize(&partImage, SNAKE_SIZE, SNAKE_SIZE);
-        textureSnakeParts[textureIndex] = LoadTextureFromImage(partImage);
     }
+    UnloadImage(snakeSprites);
 }
 
 void SetupSnake(void)
@@ -536,7 +490,7 @@ void CheckFoodIsEaten(void)
     if (foodX == snake.headX && foodY == snake.headY)
     {
         snake.length++;
-        scoreCount += 10;
+        score += 10;
         snake.hasEaten = 1;
         PlaySound(eatApple);
         SpawnFood();
