@@ -17,8 +17,6 @@
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
-const Vector2 ZERO_VEC = {0, 0};
-
 // Global declaration
 //====================================================================================
 
