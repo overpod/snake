@@ -3,7 +3,7 @@
 Установите следующие пакеты:
  
  * [Visual Studio Code](https://code.visualstudio.com/docs/?dv=win) 
- * [git](https://git-scm.com/) 
+ * [git](https://git-scm.com/)
  * [msys2](https://www.msys2.org/)
  
 Выполните следующие действия:
@@ -11,7 +11,7 @@
 #### Установите MinGW в msys2.
 Введите эту команду в msys2 
 ```
-pacman -S mingw-w64-make  
+pacman -S mingw-w64-x86_64-toolchain  
 ```
 ![avatar](https://github.com/overpod/snake/blob/main/image/Install_MinGW_in_msys2.PNG?raw=true)
 
@@ -31,6 +31,7 @@ pacman -S mingw-w64-make
 ```
   pacman -S make 
 ```
+
 #### Создание клона каталога raylab.
 В msys2 перейдите в каталог:
 ```
@@ -44,7 +45,7 @@ git clone https://github.com/raysan5/raylib.git
 В msys2 перейдите в каталог:
 
 ```
- C:\raylib\src.   
+ C:\raylib\src  
 ```
 Введите в msys2 эту команду:
 ```
