@@ -47,7 +47,7 @@ typedef struct Snake
     bool hasEaten; // Return true if food has eaten
 } Snake;
 
-typedef enum SnakeParts
+enum SnakeParts
 {
     TURN_UP_TO_RIGHT,
     BODY_HORIZONTAL,
@@ -64,7 +64,7 @@ typedef enum SnakeParts
     APPLE,
     TALE_RIGHT,
     TALE_UP
-} SnakeParts;
+};
 
 Texture2D textureSnakeParts[TALE_UP + 1]; // Array of textures of snake parts
 Sound eatApple;
