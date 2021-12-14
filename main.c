@@ -212,6 +212,7 @@ int main(void)
     char nameIsExist = 0;
     char table = 0;
     char start = 1;
+    char newChamp = 0;
 
     int letterCount = 0;
     int framesCounter = 0;
@@ -224,17 +225,15 @@ int main(void)
         return 1;
     json_object *players = json_object_object_get(root, "players");
     json_object *player;
-    
+
     int index = 0;
     int objectsCount = 0;
-    
+
     Player newPlayer = {
         .name = "\0",
     };
-    
+
     //======================================================================================
-
-
 
     char champName[MAX_INPUT_CHARS + 1] = "\0";
 
@@ -301,29 +300,32 @@ int main(void)
             if (score > hiScore)
             {
                 hiScore = score;
-
-                for (int i = 0; i < MAX_INPUT_CHARS + 1; i++)
+                newChamp = 1;
+                char checkNewChamp = 1;
+                if (checkNewChamp)
                 {
-                    SaveStorageValue(i, newPlayer.name[i]);
-                    champName[i] = newPlayer.name[i];
+                    for (int i = 0; i < MAX_INPUT_CHARS + 1; i++)
+                    {
+                        champName[i] = newPlayer.name[i];
+                    }
+
+                    checkNewChamp = 0;
                 }
 
-                SaveStorageValue(STORAGE_POSITION_HISCORE, hiScore);
-            }
-
-            if (prevScore <= score)
-            {
-                if (nameIsExist)
+                if (prevScore <= score)
                 {
-                    prevScore = score;
-                    json_object *playerHiScore = json_object_object_get(player, "Hi-score");
-                    if (score > json_object_get_int(playerHiScore))
-                        json_object_set_int(playerHiScore, prevScore);
-                }
-                else
-                {
-                    prevScore = score;
-                    json_object_object_add(player, "Hi-score", json_object_new_int(prevScore));
+                    if (nameIsExist)
+                    {
+                        prevScore = score;
+                        json_object *playerHiScore = json_object_object_get(player, "Hi-score");
+                        if (score > json_object_get_int(playerHiScore))
+                            json_object_set_int(playerHiScore, prevScore);
+                    }
+                    else
+                    {
+                        prevScore = score;
+                        json_object_object_add(player, "Hi-score", json_object_new_int(prevScore));
+                    }
                 }
             }
         }
@@ -406,6 +408,15 @@ int main(void)
 
     // Close audio device
     CloseAudioDevice();
+
+    if (newChamp)
+    {
+        for (int i = 0; i < MAX_INPUT_CHARS + 1; i++)
+        {
+            SaveStorageValue(i, newPlayer.name[i]);
+        }
+        SaveStorageValue(STORAGE_POSITION_HISCORE, hiScore);
+    }
 
     json_object_to_file(rating, root);
     json_object_put(root);
