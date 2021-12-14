@@ -3,7 +3,10 @@
 #include <math.h>
 #include <string.h>
 #include <time.h>
-#include "raylib.h"
+#include <json-c/json.h>
+#include <raylib.h>
+
+#define MAX_INPUT_CHARS 10
 
 #define SPRITE_EDGE_SIZE 64
 #define PIECE_NUMBER_IN_WIDTH 5
@@ -11,7 +14,7 @@
 #define CANVAS_WIDTH 800
 #define CANVAS_HEIGHT 400
 #define SNAKE_SIZE 40
-#define SNAKE_SPEED 0.1f
+#define SNAKE_SPEED 0.3f
 
 #define FEILD_WIDTH CANVAS_WIDTH / SNAKE_SIZE
 #define FEILD_HEIGHT CANVAS_HEIGHT / SNAKE_SIZE
@@ -28,6 +31,8 @@ bool collision = 0;
 bool pause = 0;
 bool death = 0;
 int score = 0;
+int prevScore = 0;
+bool scoreSave = 1;
 
 typedef struct Snake
 {
@@ -48,12 +53,27 @@ typedef struct Snake
     bool hasEaten; // Return true if food has eaten
 } Snake;
 
-typedef enum StoragePosition
+typedef struct Player
 {
-    STORAGE_POSITION_SCORE,
-    STORAGE_POSITION_HISCORE,
+    char name[MAX_INPUT_CHARS + 1];
+} Player;
 
-} StoragePosition;
+typedef enum StoragePositionChampion
+{
+    STORAGE_POSITION_NAME_CHAR_0,
+    STORAGE_POSITION_NAME_CHAR_1,
+    STORAGE_POSITION_NAME_CHAR_2,
+    STORAGE_POSITION_NAME_CHAR_3,
+    STORAGE_POSITION_NAME_CHAR_4,
+    STORAGE_POSITION_NAME_CHAR_5,
+    STORAGE_POSITION_NAME_CHAR_6,
+    STORAGE_POSITION_NAME_CHAR_7,
+    STORAGE_POSITION_NAME_CHAR_8,
+    STORAGE_POSITION_NAME_CHAR_9,
+    STORAGE_POSITION_NAME_CHAR_10,
+    STORAGE_POSITION_NAME_CHAR_11,
+    STORAGE_POSITION_HISCORE,
+} StoragePositionChampion;
 
 typedef enum SnakeParts
 {
@@ -135,6 +155,12 @@ void CheckCollision(void);
 
 void UploadSnakeParts(void);
 
+void Restart(char *);
+
+char EnterName(char *, int *, Player *, json_object *, int *, json_object *, char *);
+
+void DrawStart(char[], int);
+
 //====================================================================================
 
 void Draw(void)
@@ -160,6 +186,8 @@ Rectangle GetCanvasTarget()
     return rec;
 }
 
+//====================================================================================
+
 int main(void)
 {
     // Resizable window
@@ -183,39 +211,123 @@ int main(void)
     // Declarations
     //-----------------------------------------------------------------------------------
     srand(time(NULL));
+
+    char nameIsExist = 0;
+    char table = 0;
+    char start = 1;
+
+    int letterCount = 0;
     int framesCounter = 0;
     int hiScore = LoadStorageValue(STORAGE_POSITION_HISCORE);
+
+    // Initiolize json structure
+    const char *rating = "rating.json";
+    json_object *root = json_object_from_file(rating);
+    if (!root)
+        return 1;
+    json_object *players = json_object_object_get(root, "players");
+    json_object *player;
     
+    int index = 0;
+    int objectsCount = 0;
+    
+    Player newPlayer = {
+        .name = "\0",
+    };
+    
+    //======================================================================================
+
+
+
+    char champName[MAX_INPUT_CHARS + 1] = "\0";
+
+    for (int i = 0; i < MAX_INPUT_CHARS + 1; i++)
+    {
+        champName[i] = (char)LoadStorageValue(i);
+    }
+
+    //======================================================================================
+
     UploadSnakeParts();
 
     //-----------------------------------------------------------------------------------
 
     SetupSnake();
     SetTargetFPS(60);
+
     // Main loop
     //====================================================================================
     while (!WindowShouldClose())
     {
-        // Restart
-        if (IsKeyPressed(KEY_R))
+
+        // Enter nickname
+        if (start)
         {
-            death = 0;
-            collision = 0;
-            key = 0;
-            score = 0;
-            SetupSnake();
+            char new = EnterName(&nameIsExist, &letterCount, &newPlayer, players, &index, player, &start);
+
+            char newName = 1;
+            char existingName = 2;
+
+            if (new == newName)
+            {
+
+                player = json_object_new_object();
+                json_object_array_add(players, player);
+                json_object_object_add(player, "nickname", json_object_new_string(newPlayer.name));
+            }
+            else if (new == existingName)
+            {
+                player = json_object_array_get_idx(players, index);
+            }
+
+            framesCounter++;
         }
+
+        // Restart
+        Restart(&table);
         // Pause
-        if (IsKeyPressed(KEY_SPACE) && !death)
+        if (IsKeyPressed(KEY_SPACE) && !death && !start)
             pause = !pause;
 
-        // Pause and death
-        if (!pause && !death)
+        // Table
+        if (death && IsKeyPressed(KEY_T))
+        {
+            table = 1;
+            objectsCount = json_object_array_length(players);
+        }
+
+        // Update
+        if (!pause && !death && !start)
         {
             Update();
-            if (score > hiScore){
-                SaveStorageValue(STORAGE_POSITION_HISCORE, score);
+
+            if (score > hiScore)
+            {
                 hiScore = score;
+
+                for (int i = 0; i < MAX_INPUT_CHARS + 1; i++)
+                {
+                    SaveStorageValue(i, newPlayer.name[i]);
+                    champName[i] = newPlayer.name[i];
+                }
+
+                SaveStorageValue(STORAGE_POSITION_HISCORE, hiScore);
+            }
+
+            if (prevScore <= score)
+            {
+                if (nameIsExist)
+                {
+                    prevScore = score;
+                    json_object *playerHiScore = json_object_object_get(player, "Hi-score");
+                    if (score > json_object_get_int(playerHiScore))
+                        json_object_set_int(playerHiScore, prevScore);
+                }
+                else
+                {
+                    prevScore = score;
+                    json_object_object_add(player, "Hi-score", json_object_new_int(prevScore));
+                }
             }
         }
         else
@@ -226,17 +338,63 @@ int main(void)
         // -------------------------------------------------------------------------------
         BeginDrawing();
         BeginTextureMode(canvas);
-        ClearBackground(GREEN);
-        Draw();
+
+        if (!start && !table)
+        {
+            ClearBackground(GREEN);
+            Draw();
+        }
+
+        //======================================================================================
+
+        if (start)
+        {
+            DrawStart(newPlayer.name, framesCounter);
+            if (nameIsExist)
+            {
+                DrawText("This name is already taken\n", CANVAS_WIDTH / 2.0f - 200, 160, 30, GREEN);
+                DrawText("Do you want to continue to play for this player?\n", CANVAS_WIDTH / 2 - 370, 190, 30, GREEN);
+                DrawText("(y/n?)", CANVAS_WIDTH / 2 - 30, 220, 30, GREEN);
+            }
+        }
+        //======================================================================================
 
         // On pause, we draw a blinking message
         if (pause && ((framesCounter / 30) % 2))
             DrawText("PAUSED", CANVAS_WIDTH / 2 - 60, CANVAS_HEIGHT / 2 - 20, 30, GRAY);
 
-        if (death)
+        if (death && !table)
         {
-            DrawText(TextFormat("SCORE: %i\nHI-SCORE: %i", score, hiScore), 280, 50, 40, MAROON);
-            DrawText("      YOU ARE DEAD !!!  =(\n Press R to restart the game", CANVAS_WIDTH / 2 - 220, CANVAS_HEIGHT / 2 - 20, 30, BLACK);
+            DrawText(TextFormat("SCORE: %s - %i\nHI-SCORE: %s - %i", newPlayer.name, score, champName, hiScore), 230, 50, 40, MAROON);
+            DrawText("YOU ARE DEAD !!!  =(", CANVAS_WIDTH / 2 - 150, CANVAS_HEIGHT / 2 - 20, 30, BLACK);
+            DrawText("Press R to restart the game", CANVAS_WIDTH / 2 - 220, CANVAS_HEIGHT / 2 + 10, 30, BLACK);
+            DrawText("Press T to see player table", CANVAS_WIDTH / 2 - 215, CANVAS_HEIGHT / 2 + 40, 30, BLACK);
+        }
+
+        if (table)
+        {
+
+            ClearBackground(BLACK);
+
+            DrawText("Players' scores", 240, 20, 40, MAROON);
+
+            for (int i = 0; i < objectsCount; i++)
+            {
+                int boxSize = 40;
+                int font = 30;
+                int shift = (boxSize + 5) * i;
+                Rectangle textBox_1 = {20, 100 + shift, CANVAS_WIDTH / 2 - 30, boxSize};
+                Rectangle textBox_2 = {CANVAS_WIDTH / 2 + 10, 100 + shift, CANVAS_WIDTH / 2 - 30, boxSize};
+                DrawRectangleRec(textBox_1, LIGHTGRAY);
+                DrawRectangleRec(textBox_2, LIGHTGRAY);
+
+                json_object *currentPlayer = json_object_array_get_idx(players, i);
+                json_object *currentNickname = json_object_object_get(currentPlayer, "nickname");
+                json_object *currentHiscore = json_object_object_get(currentPlayer, "Hi-score");
+
+                DrawText(json_object_get_string(currentNickname), (int)textBox_1.x + 5, (int)textBox_1.y + 8, font, MAROON);
+                DrawText(json_object_get_string(currentHiscore), (int)textBox_2.x + 5, (int)textBox_2.y + 8, font, MAROON);
+            }
         }
 
         EndTextureMode();
@@ -251,6 +409,9 @@ int main(void)
 
     // Close audio device
     CloseAudioDevice();
+
+    json_object_to_file(rating, root);
+    json_object_put(root);
 
     CloseWindow();
 
@@ -334,6 +495,20 @@ void DrawFeild(void)
             DrawRectangle(x * SNAKE_SIZE + 1, y * SNAKE_SIZE + 1, SNAKE_SIZE - 2, SNAKE_SIZE - 2, GREEN);
         }
     }
+}
+
+void DrawStart(char newPlayername[], int framesCounter)
+{
+    ClearBackground(BLACK);
+
+    DrawText("Enter your name", 240, 50, 40, MAROON);
+    Rectangle textBox = {CANVAS_WIDTH / 2.0f - 100, 100, 240, 50};
+    DrawRectangleRec(textBox, LIGHTGRAY);
+
+    DrawText(newPlayername, (int)textBox.x + 5, (int)textBox.y + 8, 40, MAROON);
+
+    if (((framesCounter / 20) % 2) == 0)
+        DrawText("_", (int)textBox.x + 8 + MeasureText(newPlayername, 40), (int)textBox.y + 12, 40, MAROON);
 }
 
 void DrawSnakeBody(int x, int y)
@@ -575,4 +750,84 @@ void CheckCollision(void)
         death = 1;
         PlaySound(wallCollision);
     }
+}
+
+void Restart(char *table)
+{
+    if (IsKeyPressed(KEY_R))
+    {
+        death = 0;
+        *table = 0;
+        collision = 0;
+        key = 0;
+        score = 0;
+        scoreSave = 1;
+        SetupSnake();
+    }
+}
+
+char EnterName(char *nameIsExist, int *letterCount, Player *newPlayer, json_object *players, int *index, json_object *player, char *start)
+{
+
+    int keyStart = GetCharPressed();
+
+    while (keyStart > 0 && !(*nameIsExist) && keyStart != KEY_BACKSPACE)
+    {
+        if ((keyStart >= 32) && (keyStart <= 125) && (*letterCount < MAX_INPUT_CHARS) && (keyStart != KEY_SPACE))
+        {
+            newPlayer->name[*letterCount] = (char)keyStart;
+            newPlayer->name[*letterCount + 1] = '\0';
+            (*letterCount) = (*letterCount) + 1;
+        }
+        keyStart = GetCharPressed();
+    }
+
+    if (IsKeyPressed(KEY_ENTER) && (*letterCount) > 0)
+    {
+        char check = 0;
+
+        for (size_t i = 0, playersIndex = json_object_array_length(players); i < playersIndex; i++)
+        {
+            json_object *currentPlayer = json_object_array_get_idx(players, i);
+            json_object *currentNickname = json_object_object_get(currentPlayer, "nickname");
+
+            char *curNick = strdup(json_object_get_string(currentNickname));
+
+            if (!strcmp(newPlayer->name, curNick))
+            {
+                check = 1;
+                *nameIsExist = 1;
+                free(curNick);
+                *index = i;
+                break;
+            }
+
+            free(curNick);
+        }
+
+        if (!check)
+        {
+            *start = 0;
+            return 1;
+        }
+    }
+
+    if (*nameIsExist && IsKeyPressed(KEY_Y))
+    {
+        *start = 0;
+        return 2;
+    }
+    else if (*nameIsExist && IsKeyPressed(KEY_N))
+    {
+        *nameIsExist = 0;
+    }
+
+    if (IsKeyPressed(KEY_BACKSPACE))
+    {
+        (*letterCount) = (*letterCount) - 1;
+        if (*letterCount < 0)
+            *letterCount = 0;
+        newPlayer->name[*letterCount] = '\0';
+    }
+    return 0;
 }

@@ -22,7 +22,7 @@ win:
 	./snake.exe
 	rm ./snake.exe
 linux:
-	$(CC) ./main.c -o snake -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+	$(CC) ./main.c -o snake -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -ljson-c
 	./snake
 	rm ./snake
 mac:
