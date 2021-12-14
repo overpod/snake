@@ -9,12 +9,10 @@
 #define MAX_INPUT_CHARS 10
 
 #define SPRITE_EDGE_SIZE 64
-#define PIECE_NUMBER_IN_WIDTH 5
-#define PIECE_NUMBER_IN_HEIGHT 3
 #define CANVAS_WIDTH 800
 #define CANVAS_HEIGHT 400
 #define SNAKE_SIZE 40
-#define SNAKE_SPEED 0.3f
+#define SNAKE_SPEED 0.2f
 
 #define FEILD_WIDTH CANVAS_WIDTH / SNAKE_SIZE
 #define FEILD_HEIGHT CANVAS_HEIGHT / SNAKE_SIZE
@@ -92,10 +90,9 @@ typedef enum SnakeParts
     TURN_DOWN_TO_LEFT,
     TALE_DOWN,
     TALE_LEFT,
-    NUMBER_OF_PIECES,
 } SnakeParts;
 
-Texture2D textureSnakeParts[NUMBER_OF_PIECES]; // Array of textures of snake parts
+Texture2D textureSnakeParts[TALE_LEFT + 1]; // Array of textures of snake parts
 Sound eatApple;
 Sound wallCollision;
 
@@ -425,13 +422,14 @@ void UploadSnakeParts(void)
 {
     // Upload snake parts from image to texture array
     Image snakeSprites = LoadImage("resources/snake-parts.png");
-    for (int x = 0; x < PIECE_NUMBER_IN_HEIGHT; x++)
+
+    for (int y = 0; y < snakeSprites.height / SPRITE_EDGE_SIZE; y++)
     {
-        for (int y = 0; y < PIECE_NUMBER_IN_WIDTH; y++)
+        for (int x = 0; x < snakeSprites.width / SPRITE_EDGE_SIZE; x++)
         {
-            int Index = x * 5 + y;
-            Rectangle crop = {SPRITE_EDGE_SIZE * y,
-                              SPRITE_EDGE_SIZE * x,
+            int Index = y * snakeSprites.width / SPRITE_EDGE_SIZE + x;
+            Rectangle crop = {SPRITE_EDGE_SIZE * x,
+                              SPRITE_EDGE_SIZE * y,
                               SPRITE_EDGE_SIZE,
                               SPRITE_EDGE_SIZE};
             Image partImage = ImageFromImage(snakeSprites, crop);
