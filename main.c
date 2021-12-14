@@ -1,16 +1,9 @@
 #include "raylib.h"
 
-#define SPRITE_EDGE_SIZE 64
-#define SNAKE_SIZE 40
-#define GAME_SPRITES_PATH "resources/snake-parts.png"
-
 #define GAME_WIDTH 800
-#define GAME_HEIGHT 400
+#define GAME_HEIGHT 450
 
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#define min(a, b) ((a) < (b) ? (a) : (b))
-
-typedef enum Actions
+enum Actions
 {
     LEFT,
     RIGHT,
@@ -19,88 +12,52 @@ typedef enum Actions
     RESTART,
     PAUSE,
     NONE
-} Actions;
+};
 
 //
-Vector2 ClampValue(Vector2 value, Vector2 min, Vector2 max);
 enum Actions GetAction(void);
+void UpdateAnimateFrame(int maxFPS, int *framesCounter, int *currentFrame, int framesSpeed, int maxFrameCount);
 
 int main(void)
 {
-    // Enable config flags for resizable window and vertical synchro
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-    InitWindow(GAME_WIDTH, GAME_HEIGHT, "snake");
-    SetWindowMinSize(GAME_WIDTH / 2, GAME_HEIGHT / 2);
+    InitWindow(GAME_WIDTH, GAME_HEIGHT, "game");
 
-    int gameScreenWidth = GAME_WIDTH;
-    int gameScreenHeight = GAME_HEIGHT;
+    Texture2D appleSprites = LoadTexture("resources/apple.png");
+    int appleEdgeLength = 32;
+    int appleSpritesFramesCount = appleSprites.width / appleEdgeLength;
 
-    // Render texture initialization, used to hold the rendering result so we can easily resize it
-    RenderTexture2D target = LoadRenderTexture(gameScreenWidth, gameScreenHeight);
-    // Texture scale filter to use
-    SetTextureFilter(target.texture, TEXTURE_FILTER_BILINEAR);
+    Vector2 position = {0, GAME_HEIGHT / 2};
+    Rectangle frameRec = {0, 0, appleEdgeLength, appleEdgeLength};
+    int currentFrame = 0;
 
-    SetTargetFPS(60); // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
+    int framesCounter = 0;
+    int maxFPS = 60;
+
+    SetTargetFPS(maxFPS);
 
     int action = NONE;
-
-    Texture2D texture = LoadTexture("resources/snake-parts.png");
-    Vector2 position = {GAME_WIDTH / 2 - texture.width / 2, GAME_HEIGHT / 2 - texture.height / 2};
-    Rectangle crop = {0 * SPRITE_EDGE_SIZE, 2 * SPRITE_EDGE_SIZE, SPRITE_EDGE_SIZE, SPRITE_EDGE_SIZE};
 
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
-        // Update
-        //----------------------------------------------------------------------------------
-        // Compute required framebuffer scaling
-        float scale = min((float)GetScreenWidth() / gameScreenWidth, (float)GetScreenHeight() / gameScreenHeight);
+        UpdateAnimateFrame(maxFPS, &framesCounter, &currentFrame, 16, appleSpritesFramesCount);
+        frameRec.x = currentFrame * appleEdgeLength;
 
-        // Draw
-        //----------------------------------------------------------------------------------
-        BeginTextureMode(target);
+        // Draw render texture to screen, properly scaled
+        BeginDrawing();
         ClearBackground(RAYWHITE);
 
         action = GetAction();
         DrawText(TextFormat("action: %08i", action), 0, 0, 20, LIGHTGRAY);
+        DrawText(TextFormat("currentFrame: %08i", currentFrame), 0, 100, 20, BLACK);
 
-        DrawTextureRec(texture, crop, position, WHITE);
-
-        EndTextureMode();
-
-        BeginDrawing();
-        ClearBackground(BLACK);
-
-        // Draw render texture to screen, properly scaled
-        DrawTexturePro(target.texture, (Rectangle){0.0f, 0.0f, (float)target.texture.width, (float)-target.texture.height},
-                       (Rectangle){(GetScreenWidth() - ((float)gameScreenWidth * scale)) * 0.5f, (GetScreenHeight() - ((float)gameScreenHeight * scale)) * 0.5f,
-                                   (float)gameScreenWidth * scale, (float)gameScreenHeight * scale},
-                       (Vector2){0, 0}, 0.0f, WHITE);
+        DrawTextureRec(appleSprites, frameRec, position, WHITE);
         EndDrawing();
-        //--------------------------------------------------------------------------------------
     }
 
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
-    UnloadRenderTexture(target); // Unload render texture
-
-    CloseWindow(); // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
+    CloseWindow();
 
     return 0;
-}
-
-// Clamp Vector2 value with min and max and return a new vector2
-// NOTE: Required for virtual mouse, to clamp inside virtual game size
-Vector2 ClampValue(Vector2 value, Vector2 min, Vector2 max)
-{
-    Vector2 result = value;
-    result.x = (result.x > max.x) ? max.x : result.x;
-    result.x = (result.x < min.x) ? min.x : result.x;
-    result.y = (result.y > max.y) ? max.y : result.y;
-    result.y = (result.y < min.y) ? min.y : result.y;
-    return result;
 }
 
 enum Actions GetAction(void)
@@ -124,4 +81,17 @@ enum Actions GetAction(void)
         return PAUSE;
 
     return NONE;
+}
+
+void UpdateAnimateFrame(const int maxFPS, int *framesCounter, int *currentFrame, const int framesSpeed, const int maxFrameCount)
+{
+    (*framesCounter)++;
+    if ((*framesCounter) >= (maxFPS / framesSpeed))
+    {
+        (*framesCounter) = 0;
+        (*currentFrame)++;
+
+        if ((*currentFrame) > maxFrameCount)
+            (*currentFrame) = 0;
+    }
 }
