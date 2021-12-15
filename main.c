@@ -482,8 +482,8 @@ int main(void)
             
         }
 
-        
-        int t = (int)(fmod (GetTime(),5.0));
+        // 8 seconds for food to disappear
+        int t = (int)(fmod (GetTime(),8.0));
         if (timer !=  t) {
             timer = t;
             if (timer == 0) {
@@ -493,10 +493,25 @@ int main(void)
        
 
         //Change Snake Head direction by pressing arrow keys
-        if (IsKeyPressed(KEY_RIGHT)) direct = 1;
-        if (IsKeyPressed(KEY_LEFT)) direct = 2;
-        if (IsKeyPressed(KEY_UP)) direct = 3;
-        if (IsKeyPressed(KEY_DOWN)) direct = 4;        
+        if (IsKeyPressed(KEY_RIGHT)) {
+            //skip opposite direction
+            if (direct!=2) direct = 1;
+        };
+        
+        if (IsKeyPressed(KEY_LEFT)) {
+            //skip opposite direction
+            if (direct!=1) direct = 2;
+        };
+
+        if (IsKeyPressed(KEY_UP)) {
+            //skip opposite direction
+            if (direct!=4) direct = 3;
+        };
+        
+        if (IsKeyPressed(KEY_DOWN)) {
+             //skip opposite direction
+            if (direct!=3) direct = 4;
+        };                
         
 
         // -------------------------------------------------------------------------------
