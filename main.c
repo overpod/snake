@@ -11,8 +11,8 @@
 #define SPRITE_EDGE_SIZE 64
 #define CANVAS_WIDTH 800
 #define CANVAS_HEIGHT 400
-#define SNAKE_SIZE 40
-#define SNAKE_SPEED 0.2f
+#define SNAKE_SIZE 25
+#define SNAKE_SPEED 0.1f
 
 #define FEILD_WIDTH CANVAS_WIDTH / SNAKE_SIZE
 #define FEILD_HEIGHT CANVAS_HEIGHT / SNAKE_SIZE
@@ -214,8 +214,9 @@ int main(void)
     char start = 1;
     char newChamp = 0;
 
-    int letterCount = 0;
+    int letterCounter = 0;
     int framesCounter = 0;
+    int tableCounter = 6;
     int hiScore = LoadStorageValue(STORAGE_POSITION_HISCORE);
 
     // Initiolize json structure
@@ -227,7 +228,7 @@ int main(void)
     json_object *player;
 
     int index = 0;
-    int objectsCount = 0;
+    int objectsCounter = 0;
 
     Player newPlayer = {
         .name = "\0",
@@ -259,7 +260,7 @@ int main(void)
         // Enter nickname
         if (start)
         {
-            char new = EnterName(&nameIsExist, &letterCount, &newPlayer, players, &index, player, &start);
+            char new = EnterName(&nameIsExist, &letterCounter, &newPlayer, players, &index, player, &start);
 
             char newName = 1;
             char existingName = 2;
@@ -286,10 +287,27 @@ int main(void)
             pause = !pause;
 
         // Table
+
         if (death && IsKeyPressed(KEY_T))
         {
             table = 1;
-            objectsCount = json_object_array_length(players);
+            objectsCounter = json_object_array_length(players);
+        }
+        if (table)
+        {
+            if (IsKeyPressed(KEY_RIGHT))
+            {
+                if (tableCounter < objectsCounter)
+                    tableCounter += 6;
+            }
+            else if (IsKeyPressed(KEY_LEFT))
+            {
+                tableCounter -= 6;
+                if (tableCounter < 6)
+                {
+                    tableCounter = 6;
+                }
+            }
         }
 
         // Update
@@ -311,21 +329,20 @@ int main(void)
 
                     checkNewChamp = 0;
                 }
-
-                if (prevScore <= score)
+            }
+            if (prevScore <= score)
+            {
+                if (nameIsExist)
                 {
-                    if (nameIsExist)
-                    {
-                        prevScore = score;
-                        json_object *playerHiScore = json_object_object_get(player, "Hi-score");
-                        if (score > json_object_get_int(playerHiScore))
-                            json_object_set_int(playerHiScore, prevScore);
-                    }
-                    else
-                    {
-                        prevScore = score;
-                        json_object_object_add(player, "Hi-score", json_object_new_int(prevScore));
-                    }
+                    prevScore = score;
+                    json_object *playerHiScore = json_object_object_get(player, "Hi-score");
+                    if (score > json_object_get_int(playerHiScore))
+                        json_object_set_int(playerHiScore, prevScore);
+                }
+                else
+                {
+                    prevScore = score;
+                    json_object_object_add(player, "Hi-score", json_object_new_int(prevScore));
                 }
             }
         }
@@ -376,12 +393,13 @@ int main(void)
             ClearBackground(BLACK);
 
             DrawText("Players' scores", 240, 20, 40, MAROON);
+            DrawText("Use LEFT and RIGHT arrows to switch the table", 150, 65, 20, MAROON);
 
-            for (int i = 0; i < objectsCount; i++)
+            for (int i = tableCounter - 6, line = 0; i < tableCounter && i < objectsCounter; i++, line++)
             {
                 int boxSize = 40;
                 int font = 30;
-                int shift = (boxSize + 5) * i;
+                int shift = (boxSize + 5) * line;
                 Rectangle textBox_1 = {20, 100 + shift, CANVAS_WIDTH / 2 - 30, boxSize};
                 Rectangle textBox_2 = {CANVAS_WIDTH / 2 + 10, 100 + shift, CANVAS_WIDTH / 2 - 30, boxSize};
                 DrawRectangleRec(textBox_1, LIGHTGRAY);
@@ -775,23 +793,23 @@ void Restart(char *table)
     }
 }
 
-char EnterName(char *nameIsExist, int *letterCount, Player *newPlayer, json_object *players, int *index, json_object *player, char *start)
+char EnterName(char *nameIsExist, int *letterCounter, Player *newPlayer, json_object *players, int *index, json_object *player, char *start)
 {
 
     int keyStart = GetCharPressed();
 
     while (keyStart > 0 && !(*nameIsExist) && keyStart != KEY_BACKSPACE)
     {
-        if ((keyStart >= 32) && (keyStart <= 125) && (*letterCount < MAX_INPUT_CHARS) && (keyStart != KEY_SPACE))
+        if ((keyStart >= 32) && (keyStart <= 125) && (*letterCounter < MAX_INPUT_CHARS) && (keyStart != KEY_SPACE))
         {
-            newPlayer->name[*letterCount] = (char)keyStart;
-            newPlayer->name[*letterCount + 1] = '\0';
-            (*letterCount) = (*letterCount) + 1;
+            newPlayer->name[*letterCounter] = (char)keyStart;
+            newPlayer->name[*letterCounter + 1] = '\0';
+            (*letterCounter) = (*letterCounter) + 1;
         }
         keyStart = GetCharPressed();
     }
 
-    if (IsKeyPressed(KEY_ENTER) && (*letterCount) > 0)
+    if (IsKeyPressed(KEY_ENTER) && (*letterCounter) > 0)
     {
         char check = 0;
 
@@ -833,10 +851,10 @@ char EnterName(char *nameIsExist, int *letterCount, Player *newPlayer, json_obje
 
     if (IsKeyPressed(KEY_BACKSPACE))
     {
-        (*letterCount) = (*letterCount) - 1;
-        if (*letterCount < 0)
-            *letterCount = 0;
-        newPlayer->name[*letterCount] = '\0';
+        (*letterCounter) = (*letterCounter) - 1;
+        if (*letterCounter < 0)
+            *letterCounter = 0;
+        newPlayer->name[*letterCounter] = '\0';
     }
     return 0;
 }
