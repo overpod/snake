@@ -468,7 +468,7 @@ int main(void)
             int counter;
             for (counter=0; counter<4; counter++){
                 snake = walk(snake, direct, GetScreenWidth(), GetScreenHeight());
-                
+                /*
                 if (intersectDetect(snake)==1){
                     //TODO GAME OVER render
                     printf("Game Over");
@@ -485,7 +485,7 @@ int main(void)
                     food_coordinates = getFoodCoordinates(GetScreenWidth(), GetScreenHeight());
                     snake = grow(snake, direct, GetScreenWidth(), GetScreenHeight());
                 };
-                
+                */
                 
 
             }
