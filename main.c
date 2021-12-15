@@ -436,6 +436,11 @@ int main(void)
         SaveStorageValue(STORAGE_POSITION_HISCORE, hiScore);
     }
 
+    for (int i = 0; i < TALE_LEFT + 1; i++)
+    {
+        UnloadTexture (textureSnakeParts[i]);
+    }
+
     json_object_to_file(rating, root);
     json_object_put(root);
 
