@@ -14,9 +14,15 @@ enum Actions
     NONE
 };
 
+typedef struct AnimationСounters
+{
+    int framesCounter;
+    int currentFrame;
+} AnimationСounters;
+
 //
 enum Actions GetAction(void);
-void UpdateAnimateFrame(int maxFPS, int *framesCounter, int *currentFrame, int framesSpeed, int maxFrameCount);
+void updateAnimateFrameCount(AnimationСounters *animationСounters, int framesSpeed, int maxFrameCount);
 
 int main(void)
 {
@@ -28,20 +34,23 @@ int main(void)
 
     Vector2 position = {0, GAME_HEIGHT / 2};
     Rectangle frameRec = {0, 0, appleEdgeLength, appleEdgeLength};
-    int currentFrame = 0;
+    AnimationСounters animationСounters = {0, 0};
 
-    int framesCounter = 0;
-    int maxFPS = 60;
-
-    SetTargetFPS(maxFPS);
+    SetTargetFPS(60);
 
     int action = NONE;
+
+    // for snake apple animation
+    Texture2D snakePartsImage = LoadTexture("resources/snake-parts.png");
+
+    Rectangle snakeAppleSource = {0, 2 * 64, 64, 64};
+    Vector2 snakeApplePosition = {GAME_WIDTH / 2, GAME_HEIGHT / 2};
 
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
-        UpdateAnimateFrame(maxFPS, &framesCounter, &currentFrame, 16, appleSpritesFramesCount);
-        frameRec.x = currentFrame * appleEdgeLength;
+        updateAnimateFrameCount(&animationСounters, 16, appleSpritesFramesCount);
+        frameRec.x = animationСounters.currentFrame * appleEdgeLength;
 
         // Draw render texture to screen, properly scaled
         BeginDrawing();
@@ -49,9 +58,12 @@ int main(void)
 
         action = GetAction();
         DrawText(TextFormat("action: %08i", action), 0, 0, 20, LIGHTGRAY);
-        DrawText(TextFormat("currentFrame: %08i", currentFrame), 0, 100, 20, BLACK);
+        DrawText(TextFormat("FPS: %08i", GetFPS()), 0, 100, 20, BLACK);
+        DrawText(TextFormat("currentFrame: %08i", animationСounters.currentFrame), 0, 200, 20, BLACK);
 
         DrawTextureRec(appleSprites, frameRec, position, WHITE);
+
+        DrawTextureRec(snakePartsImage, snakeAppleSource, snakeApplePosition, WHITE);
         EndDrawing();
     }
 
@@ -83,15 +95,19 @@ enum Actions GetAction(void)
     return NONE;
 }
 
-void UpdateAnimateFrame(const int maxFPS, int *framesCounter, int *currentFrame, const int framesSpeed, const int maxFrameCount)
+void updateAnimateFrameCount(
+    AnimationСounters *animationСounters,
+    const int framesSpeed,
+    const int maxFrameCount)
 {
-    (*framesCounter)++;
-    if ((*framesCounter) >= (maxFPS / framesSpeed))
-    {
-        (*framesCounter) = 0;
-        (*currentFrame)++;
 
-        if ((*currentFrame) > maxFrameCount)
-            (*currentFrame) = 0;
+    animationСounters->framesCounter++;
+    if (animationСounters->framesCounter >= (GetFPS() / framesSpeed))
+    {
+        animationСounters->framesCounter = 0;
+        animationСounters->currentFrame++;
+
+        if (animationСounters->currentFrame > maxFrameCount)
+            animationСounters->currentFrame = 0;
     }
 }

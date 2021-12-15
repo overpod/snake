@@ -1,4 +1,21 @@
 {
   "terminal.integrated.defaultProfile.windows": "Command Prompt",
-  "make-task-provider.windows.makeExecutable": "c:\\msys64\\usr\\bin\\make.exe"
+  "make-task-provider.windows.makeExecutable": "c:\\msys64\\usr\\bin\\make.exe",
+  "files.associations": {
+    "__config": "cpp",
+    "__hash_table": "cpp",
+    "__locale": "cpp",
+    "array": "cpp",
+    "functional": "cpp",
+    "ios": "cpp",
+    "iterator": "cpp",
+    "locale": "cpp",
+    "ostream": "cpp",
+    "sstream": "cpp",
+    "string": "cpp",
+    "string_view": "cpp",
+    "type_traits": "cpp",
+    "vector": "cpp",
+    "*.m": "cpp"
+  }
 }
