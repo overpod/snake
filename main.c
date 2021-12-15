@@ -17,7 +17,7 @@
 typedef enum State {
     Play = 1,
     Pause = 2,
-    Gameover = 3,
+    Gameover = 3//,
     //Start = 4
 };
 
@@ -71,7 +71,7 @@ int intersectDetectFood(Vector2, Snake*);
 
 Vector2 getFoodCoordinates(int max_x, int max_y);
 
-void DrawSnake(Snake*, Texture2D[], direction);
+void DrawSnake(Snake*, Texture2D*[], direction);
 
 // FUNCTIONS
 //====================================================================================
@@ -291,12 +291,12 @@ int getSnakePathLength(Snake *snake) {
     return counter;
 }
 
-void DrawSnake(Snake *snake, Texture2D textures[], enum direction d){
+void DrawSnake(Snake *snake, Texture2D* textures[], enum direction d){
     Vector2 snakeHeadPosition = { snake->x, snake->y };
     snake = reverse(snake);
             //draw snake body
             Snake *tmp = snake;
-            // we will draw snake from tail to head
+            // we will draw snake from tail to head            
             int path_counter=1;            
             while (tmp != NULL)
             {
@@ -304,15 +304,15 @@ void DrawSnake(Snake *snake, Texture2D textures[], enum direction d){
             if (path_counter%15 == 0) {
                 snakeHeadPosition.x = tmp->x;
                 snakeHeadPosition.y = tmp->y;                     
-                snakeHeadPosition.x = tmp->x - textures[0].width/4;
-                snakeHeadPosition.y = tmp->y - textures[0].height/4;
-                DrawTextureEx(textures[0], snakeHeadPosition, 0.0, 0.5, WHITE);
+                snakeHeadPosition.x = tmp->x - textures[0]->width/4;
+                snakeHeadPosition.y = tmp->y - textures[0]->height/4;
+                DrawTextureEx(*textures[0], snakeHeadPosition, 0.0, 0.5, WHITE);
             }
 
             if (tmp->next == NULL) {
-                snakeHeadPosition.x = tmp->x - textures[(int)d].width/4;
-                snakeHeadPosition.y = tmp->y - textures[(int)d].height/4;
-                DrawTextureEx(textures[(int)d], snakeHeadPosition, 0.0, 0.5, WHITE);
+                snakeHeadPosition.x = tmp->x - textures[(int)d]->width/4;
+                snakeHeadPosition.y = tmp->y - textures[(int)d]->height/4;
+                DrawTextureEx(*textures[(int)d], snakeHeadPosition, 0.0, 0.5, WHITE);
             }
 
             path_counter++;               
@@ -328,7 +328,7 @@ void DrawSnake(Snake *snake, Texture2D textures[], enum direction d){
  Vector2 getFoodCoordinates(int max_x, int max_y)
 {
     
-    Vector2 rand_coord = { rand()%(max_x + 1), rand()%(max_y + 1) };
+    Vector2 rand_coord = { rand()%max_x, rand()%max_y};
     return rand_coord;
 }
 
@@ -357,12 +357,12 @@ int main(void)
     Texture2D head_left =  LoadTextureFromImage(snake_head_img);
     Texture2D snake_body_texture = LoadTexture("resources/body.png");
 
-    Texture2D textures[] = {
-        snake_body_texture,
-        head_right,
-        head_left,
-        head_top,
-        head_bottom         
+    Texture2D* textures[] = {
+        &snake_body_texture,
+        &head_right,
+        &head_left,
+        &head_top,
+        &head_bottom         
     };
 
     //RenderTexture2D target = LoadRenderTexture(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -377,14 +377,15 @@ int main(void)
     //eatApple = LoadSound("resources/eat_apple.mp3");
     //wallCollision = LoadSound("resources/wall_collision.mp3");
 
-    //Initialize random generator
+    // Declarations
+    //-----------------------------------------------------------------------------------
     srand(time(NULL));
     
 
     // initialize snake path initial coordinates   
     Snake *snake = create(20, 20);
     
-    //add to snake path (45 px) 45 nodes
+    //add to snake path (50 px) 50 nodes
     int counter;
     for (counter=0; counter<=50; counter++){
         snake = add_element_start(counter + 20,20, snake);              
@@ -491,12 +492,12 @@ int main(void)
         };
        
 
-        
+        //Change Snake Head direction by pressing arrow keys
         if (IsKeyPressed(KEY_RIGHT)) direct = 1;
         if (IsKeyPressed(KEY_LEFT)) direct = 2;
         if (IsKeyPressed(KEY_UP)) direct = 3;
-        if (IsKeyPressed(KEY_DOWN)) direct = 4;
-        if (IsKeyPressed(KEY_SPACE)) snake = grow(snake, direct, GetScreenWidth(), GetScreenHeight());        
+        if (IsKeyPressed(KEY_DOWN)) direct = 4;        
+        
 
         // -------------------------------------------------------------------------------
         // Draw
@@ -524,7 +525,7 @@ int main(void)
             DrawText("move snake with arrow keys", 10, 10, 20, WHITE);
 
             DrawSnake(snake, textures, direct);
-            DrawTextureEx(textures[0], food_coordinates, 0.0, 0.5, WHITE);            
+            DrawTextureEx(*textures[0], food_coordinates, 0.0, 0.5, WHITE);            
            
         EndDrawing();     
     }
