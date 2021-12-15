@@ -174,6 +174,7 @@ int intersectDetect(Snake* head){
         //intersect condition
         if (tmp->x == head->x && tmp->y == head->y) 
         {
+            free(tmp);
             return 1;
         };
         tmp = tmp -> next;
@@ -184,10 +185,12 @@ int intersectDetect(Snake* head){
 
 
 // 0 - no intersection // 1 - intersect detect
-int intersectDetectFood(Vector2 coord, Snake* head){
+int intersectDetectFood(Vector2 coord, Snake* snake){
+    Snake *head = snake;
     //distance between two points AB = √(xb - xa)2 + (yb - ya)2
     double distance  = sqrt(pow((coord.x-head->x), 2.0) + pow((coord.y-head->y), 2.0));    
-    //if the distance between food and snake head center coordinates is less than  20.0 we should assume that the food is caught
+    free(head);
+    //if the distance between food and snake head center coordinates is less than  20.0 we should assume that the food is caught    
     if (distance < 20.0 ) return 1;
     return 0;
 }
@@ -465,18 +468,24 @@ int main(void)
             int counter;
             for (counter=0; counter<4; counter++){
                 snake = walk(snake, direct, GetScreenWidth(), GetScreenHeight());
+                
                 if (intersectDetect(snake)==1){
                     //TODO GAME OVER render
                     printf("Game Over");
                     printf("%f\n", GetTime());
                 };
-                if (intersectDetectFood(food_coordinates, snake)==1){
+                
+                
+                int condition = intersectDetectFood(food_coordinates, snake);
+
+                if (condition==1){
                     //TODO New FOOD timing correction
                     printf("Got the Food");
                     printf("%f\n", GetTime());
                     food_coordinates = getFoodCoordinates(GetScreenWidth(), GetScreenHeight());
                     snake = grow(snake, direct, GetScreenWidth(), GetScreenHeight());
                 };
+                
                 
 
             }
