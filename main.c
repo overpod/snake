@@ -188,7 +188,7 @@ int intersectDetectFood(Vector2 coord, Snake* head){
     //distance between two points AB = √(xb - xa)2 + (yb - ya)2
     double distance  = sqrt(pow((coord.x-head->x), 2.0) + pow((coord.y-head->y), 2.0));    
     //if the distance between food and snake head center coordinates is less than  20.0 we should assume that the food is caught
-    if (distance < 20.0 ) return 1;}
+    if (distance < 20.0 ) return 1;
     return 0;
 }
 
