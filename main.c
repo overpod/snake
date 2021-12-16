@@ -152,11 +152,15 @@ void CheckCollision(void);
 
 void UploadSnakeParts(void);
 
-void Restart(char *);
+void Restart(char *, int *);
 
 char EnterName(char *, int *, Player *, json_object *, int *, json_object *, char *);
 
 void DrawStart(char[], int);
+
+void Merge(int *, int *, int *, int, int, char * [MAX_INPUT_CHARS + 1], char * [MAX_INPUT_CHARS + 1], char * [MAX_INPUT_CHARS + 1]);
+
+void SortMerge(int *, int, char * [MAX_INPUT_CHARS + 1]);
 
 //====================================================================================
 
@@ -213,6 +217,8 @@ int main(void)
     char table = 0;
     char start = 1;
     char newChamp = 0;
+    char *tableMemoryBlockName[MAX_INPUT_CHARS + 1] = {0};
+    int *tableMemoryBlockScore = NULL;
 
     int letterCounter = 0;
     int framesCounter = 0;
@@ -228,7 +234,7 @@ int main(void)
     json_object *player;
 
     int index = 0;
-    int objectsCounter = 0;
+    int jsonArrayLength = 0;
 
     Player newPlayer = {
         .name = "\0",
@@ -281,7 +287,7 @@ int main(void)
         }
 
         // Restart
-        Restart(&table);
+        Restart(&table, tableMemoryBlockScore);
         // Pause
         if (IsKeyPressed(KEY_SPACE) && !death && !start)
             pause = !pause;
@@ -291,13 +297,31 @@ int main(void)
         if (death && IsKeyPressed(KEY_T))
         {
             table = 1;
-            objectsCounter = json_object_array_length(players);
+
+            if (tableMemoryBlockScore == NULL)
+            {
+                jsonArrayLength = json_object_array_length(players);
+
+                tableMemoryBlockScore = malloc(jsonArrayLength * sizeof(int));
+
+                for (int i = 0; i < jsonArrayLength; i++)
+                {
+                    json_object *currentPlayer = json_object_array_get_idx(players, i);
+                    json_object *currentHiscore = json_object_object_get(currentPlayer, "Hi-score");
+                    json_object *currentNickname = json_object_object_get(currentPlayer, "nickname");
+
+                    tableMemoryBlockScore[i] = json_object_get_int(currentHiscore);
+                    tableMemoryBlockName[i] = strdup(json_object_get_string(currentNickname));
+                }
+
+                SortMerge(tableMemoryBlockScore, jsonArrayLength, tableMemoryBlockName);
+            }
         }
         if (table)
         {
             if (IsKeyPressed(KEY_RIGHT))
             {
-                if (tableCounter < objectsCounter)
+                if (tableCounter < jsonArrayLength)
                     tableCounter += 6;
             }
             else if (IsKeyPressed(KEY_LEFT))
@@ -395,22 +419,19 @@ int main(void)
             DrawText("Players' scores", 240, 20, 40, MAROON);
             DrawText("Use LEFT and RIGHT arrows to switch the table", 150, 65, 20, MAROON);
 
-            for (int i = tableCounter - 6, line = 0; i < tableCounter && i < objectsCounter; i++, line++)
+            for (int i = tableCounter - 6, line = 0; i < tableCounter && i < jsonArrayLength; i++, line++)
             {
                 int boxSize = 40;
                 int font = 30;
                 int shift = (boxSize + 5) * line;
+
                 Rectangle textBox_1 = {20, 100 + shift, CANVAS_WIDTH / 2 - 30, boxSize};
                 Rectangle textBox_2 = {CANVAS_WIDTH / 2 + 10, 100 + shift, CANVAS_WIDTH / 2 - 30, boxSize};
                 DrawRectangleRec(textBox_1, LIGHTGRAY);
                 DrawRectangleRec(textBox_2, LIGHTGRAY);
 
-                json_object *currentPlayer = json_object_array_get_idx(players, i);
-                json_object *currentNickname = json_object_object_get(currentPlayer, "nickname");
-                json_object *currentHiscore = json_object_object_get(currentPlayer, "Hi-score");
-
-                DrawText(json_object_get_string(currentNickname), (int)textBox_1.x + 5, (int)textBox_1.y + 8, font, MAROON);
-                DrawText(json_object_get_string(currentHiscore), (int)textBox_2.x + 5, (int)textBox_2.y + 8, font, MAROON);
+                DrawText(tableMemoryBlockName[i], (int)textBox_1.x + 5, (int)textBox_1.y + 8, font, MAROON);
+                DrawText(TextFormat("%i", tableMemoryBlockScore[i]), (int)textBox_2.x + 5, (int)textBox_2.y + 8, font, MAROON);
             }
         }
 
@@ -438,7 +459,7 @@ int main(void)
 
     for (int i = 0; i < TALE_LEFT + 1; i++)
     {
-        UnloadTexture (textureSnakeParts[i]);
+        UnloadTexture(textureSnakeParts[i]);
     }
 
     json_object_to_file(rating, root);
@@ -784,10 +805,11 @@ void CheckCollision(void)
     }
 }
 
-void Restart(char *table)
+void Restart(char *table, int *tableMemoryBlockScore)
 {
     if (IsKeyPressed(KEY_R))
     {
+        free(tableMemoryBlockScore);
         death = 0;
         *table = 0;
         collision = 0;
@@ -862,4 +884,85 @@ char EnterName(char *nameIsExist, int *letterCounter, Player *newPlayer, json_ob
         newPlayer->name[*letterCounter] = '\0';
     }
     return 0;
+}
+
+void Merge(int *targetArr, int *arr1, int *arr2, int sizeArr1, int sizeArr2, char *targetName[MAX_INPUT_CHARS + 1], char *arrName1[MAX_INPUT_CHARS + 1], char *arrName2[MAX_INPUT_CHARS + 1])
+{
+    int arr1Index = 0;
+    int arr2Index = 0;
+    int targetArrIndex = 0;
+
+    while (arr1Index < sizeArr1 && arr2Index < sizeArr2)
+    {
+
+        if (arr1[arr1Index] >= arr2[arr2Index])
+        {
+            targetArr[targetArrIndex] = arr1[arr1Index];
+            targetName[targetArrIndex] = strdup(arrName1[arr1Index]);
+            arr1Index++;
+        }
+        else
+        {
+            targetArr[targetArrIndex] = arr2[arr2Index];
+
+            targetName[targetArrIndex] = strdup(arrName2[arr2Index]);
+            arr2Index++;
+        }
+
+        targetArrIndex++;
+    }
+
+    while (arr1Index < sizeArr1)
+    {
+
+        targetArr[targetArrIndex] = arr1[arr1Index];
+        targetName[targetArrIndex] = strdup(arrName1[arr1Index]);
+        arr1Index++;
+        targetArrIndex++;
+    }
+    while (arr2Index < sizeArr2)
+    {
+
+        targetArr[targetArrIndex] = arr2[arr2Index];
+        targetName[targetArrIndex] = strdup(arrName2[arr2Index]);
+        arr2Index++;
+        targetArrIndex++;
+    }
+}
+
+void SortMerge(int *arr, int sizeArr, char *arrName[MAX_INPUT_CHARS + 1])
+{
+    if (sizeArr < 2)
+        return;
+
+    int sizeLeftArray = sizeArr / 2;
+    int sizeRightArray = sizeArr - sizeLeftArray;
+
+    int *leftArray = malloc(sizeof(arr[0]) * sizeLeftArray);
+    int *rightArray = malloc(sizeof(arr[0]) * sizeRightArray);
+
+    char *leftArrayName[MAX_INPUT_CHARS + 1] = {0};
+    char *rightArrayName[MAX_INPUT_CHARS + 1] = {0};
+
+    for (int i = 0; i < sizeArr; i++)
+    {
+        if (i < sizeLeftArray)
+        {
+            leftArray[i] = arr[i];
+            leftArrayName[i] = strdup(arrName[i]);
+        }
+        else
+        {
+            rightArray[i - sizeLeftArray] = arr[i];
+            rightArrayName[i - sizeLeftArray] = strdup(arrName[i]);
+        }
+    }
+
+    SortMerge(leftArray, sizeLeftArray, leftArrayName);
+    SortMerge(rightArray, sizeRightArray, rightArrayName);
+
+    Merge(arr, leftArray, rightArray, sizeLeftArray, sizeRightArray, arrName, leftArrayName, rightArrayName);
+
+    free(leftArray);
+    free(rightArray);
 }
