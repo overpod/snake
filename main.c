@@ -53,17 +53,17 @@ struct Snake *next;
 //====================================================================================
 void offset_calc(Offset*, int, int, int, int);
 
-Snake* create(int, int);
+Snake *create(int, int);
 
-Snake* add_element_start(int x, int y, Snake *head);
+Snake *add_element_start(int x, int y, Snake *head);
 
-Snake* remove_element_end(Snake*);
+Snake *remove_element_end(Snake*);
 
-Snake* reverse(Snake*);
+Snake *reverse(Snake*);
 
-Snake* walk(Snake*, direction, int, int);
+Snake *walk(Snake*, direction, int, int);
 
-Snake* grow(Snake*, direction, int, int);
+Snake *grow(Snake*, direction, int, int);
 
 int intersectDetect(Snake*);
 
@@ -75,7 +75,7 @@ void DrawSnake(Snake*, Texture2D*[], direction);
 
 // FUNCTIONS
 //====================================================================================
-//calculate offset for snake HEAD and snake TAIL
+//calculate offset for snake HEAD
 void offset_calc(Offset *offset, int max_x, int max_y, int x, int y)
 {
     //calculate left offset
@@ -116,7 +116,7 @@ tmp ->x = x;
 tmp ->y = y;
 // Присваивание указателю на следующий элемент значения NULL
 tmp -> next = NULL;
-return(tmp);
+return tmp;
 }
 
 Snake *add_element_start(int x, int y, Snake *head)
@@ -124,18 +124,18 @@ Snake *add_element_start(int x, int y, Snake *head)
 // Выделение памяти под узел списка
 Snake *tmp = (Snake*)malloc(sizeof(Snake));
 // Присваивание значения узлу
-tmp -> x = x;
-tmp -> y = y;
+tmp->x = x;
+tmp->y = y;
 // Присваивание указателю на следующий элемент значения указателя на «голову» 
 // первоначального списка
-tmp -> next = head;
-return(tmp);
+tmp->next = head;
+return tmp;
 }
 
 Snake *remove_element_end(Snake *head)
 {
 // Присваивание новому указателю  tmp указателя head, p - NULL
-Snake *tmp = head, *p = NULL;
+Snake* tmp = head, *p = NULL;
 // Проверка списка на пустоту
 if (head == NULL)
 return NULL;
@@ -143,19 +143,19 @@ return NULL;
 while (tmp->next != NULL)
 {
 p = tmp;
-tmp = tmp -> next;
+tmp = tmp->next;
 }
 
 // Присваивание новому указателю указателя tmp
-p -> next = NULL;
+p->next = NULL;
 // Освобождение памяти для указателя tmp
 free(tmp);
 return head;
 }
 
 
-Snake* reverse(Snake* root) {
-  Snake* new_root = 0;
+Snake *reverse(Snake* root) {
+  Snake* new_root = NULL;
   while (root) {
     Snake* next = root->next;
     root->next = new_root;
@@ -165,43 +165,13 @@ Snake* reverse(Snake* root) {
   return new_root;
 }
 
-// 0 - no intersection // 1 - intersect detect
-int intersectDetect(Snake* head){
-    Snake *tmp = head;
-    tmp = tmp -> next;
-    while (tmp->next != NULL)
-    {
-        //intersect condition
-        if (tmp->x == head->x && tmp->y == head->y) 
-        {
-            free(tmp);
-            return 1;
-        };
-        tmp = tmp -> next;
-    }
-    free(tmp);
-    return 0;   
-}
-
-
-// 0 - no intersection // 1 - intersect detect
-int intersectDetectFood(Vector2 coord, Snake* snake){
-    Snake *head = snake;
-    //distance between two points AB = √(xb - xa)2 + (yb - ya)2
-    double distance  = sqrt(pow((coord.x-head->x), 2.0) + pow((coord.y-head->y), 2.0));    
-    free(head);
-    //if the distance between food and snake head center coordinates is less than  20.0 we should assume that the food is caught    
-    if (distance < 20.0 ) return 1;
-    return 0;
-}
-
-
 Snake *walk(Snake *snake, enum direction d, int max_x, int max_y)
 {
 //initialising offset    
 Offset off = {0,0,0,0};    
 Offset *off_ptr = &off;
 offset_calc(off_ptr, max_x, max_y, snake->x, snake->y);
+
 //remove TAIL
 snake = remove_element_end(snake);
         
@@ -284,20 +254,9 @@ switch (d) {
     return snake;
 }
 
-int getSnakePathLength(Snake *snake) {
-    int counter = 0;
-    Snake *tmp = snake;
-    while (tmp != NULL){
-        counter++;
-        tmp = tmp -> next;
-    }
-    free(tmp);
-    return counter;
-}
-
 void DrawSnake(Snake *snake, Texture2D* textures[], enum direction d){
-    Vector2 snakeHeadPosition = { snake->x, snake->y };
-    snake = reverse(snake);
+            Vector2 snakeHeadPosition = { snake->x, snake->y };
+            snake = reverse(snake);
             //draw snake body
             Snake *tmp = snake;
             // we will draw snake from tail to head            
@@ -322,7 +281,7 @@ void DrawSnake(Snake *snake, Texture2D* textures[], enum direction d){
             path_counter++;               
     
 
-            tmp = tmp -> next;
+            tmp = tmp->next;
             }
            free(tmp);
            snake = reverse(snake);
@@ -334,6 +293,32 @@ void DrawSnake(Snake *snake, Texture2D* textures[], enum direction d){
     
     Vector2 rand_coord = { rand()%max_x, rand()%max_y};
     return rand_coord;
+}
+
+// 0 - no intersection // 1 - intersect detect
+int intersectDetect(Snake* head){
+    Snake *tmp = head;
+    tmp = tmp -> next;
+    while (tmp->next != NULL)
+    {
+        //intersect condition
+        if (tmp->x == head->x && tmp->y == head->y) 
+        {            
+            return 1;
+        };
+        tmp = tmp -> next;
+    }    
+    return 0;   
+}
+
+
+// 0 - no intersection // 1 - intersect detect
+int intersectDetectFood(Vector2 coord, Snake* snake){
+    //distance between two points AB = √(xb - xa)2 + (yb - ya)2
+    double distance  = sqrt(pow((coord.x-snake->x), 2.0) + pow((coord.y-snake->y), 2.0));        
+    //if the distance between food and snake head center coordinates is less than  20.0 we should assume that the food is caught    
+    if (distance < 20.0 ) return 1;
+    return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -468,7 +453,7 @@ int main(void)
             int counter;
             for (counter=0; counter<4; counter++){
                 snake = walk(snake, direct, GetScreenWidth(), GetScreenHeight());
-                /*
+                
                 if (intersectDetect(snake)==1){
                     //TODO GAME OVER render
                     printf("Game Over");
@@ -485,7 +470,7 @@ int main(void)
                     food_coordinates = getFoodCoordinates(GetScreenWidth(), GetScreenHeight());
                     snake = grow(snake, direct, GetScreenWidth(), GetScreenHeight());
                 };
-                */
+                
                 
 
             }
